@@ -1,1 +1,367 @@
-hello
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Back‑Then Inspired — History Magazine Template</title>
+  <meta name="description" content="A clean, magazine-style template for history content: features, timelines, categories, and newsletter." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0e0f12;            /* deep charcoal */
+      --paper:#f7f5ef;         /* warm off‑white */
+      --ink:#1c1c1c;           /* text */
+      --muted:#6b7280;         /* muted text */
+      --brand:#c29a5b;         /* warm gold */
+      --accent:#8aa6a3;        /* sage/teal */
+      --line:#e7e2d6;          /* subtle borders */
+      --card:#fffaf0;          /* article card */
+    }
+
+    /* Base */
+    html,body{height:100%}
+    body{
+      margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      background:var(--paper); color:var(--ink); line-height:1.55;
+    }
+    .container{width:min(1200px,92vw); margin-inline:auto}
+    .flow > * + *{margin-top:1rem}
+
+    /* Header */
+    .topbar{background:var(--bg); color:#fff}
+    .topbar .container{display:flex; align-items:center; justify-content:space-between; padding:0.8rem 0}
+    .brand{display:flex; align-items:center; gap:.75rem; text-decoration:none; color:inherit}
+    .brand-mark{width:42px; aspect-ratio:1; border:2px solid #fff; border-radius:999px; display:grid; place-items:center; font-family:"Playfair Display",serif; font-weight:700}
+    .brand-title{font-family:"Playfair Display",serif; font-weight:700; letter-spacing:.5px; font-size:1.25rem}
+
+    nav.primary{display:flex; gap:1.25rem; align-items:center}
+    nav.primary a{color:#d7dbe7; text-decoration:none; font-weight:500}
+    nav.primary a:hover{color:#fff}
+
+    .actions{display:flex; gap:.5rem; align-items:center}
+    .btn{appearance:none; border:1px solid #ffffff33; background:transparent; color:#fff; border-radius:999px; padding:.5rem .9rem; font-weight:600; cursor:pointer}
+    .btn:hover{background:#ffffff14}
+    .hamburger{display:none; background:none; border:0; color:#fff; font-size:1.35rem; cursor:pointer}
+
+    @media (max-width: 900px){
+      nav.primary{display:none}
+      .hamburger{display:block}
+      .mobile-menu{display:none; background:var(--bg); color:#fff; border-top:1px solid #ffffff26}
+      .mobile-menu.open{display:block}
+      .mobile-menu a{display:block; padding:0.9rem 1rem; text-decoration:none; color:#e6eaf5}
+      .mobile-menu a + a{border-top:1px solid #ffffff14}
+    }
+
+    /* Hero */
+    .hero{position:relative; isolation:isolate}
+    .hero-grid{display:grid; grid-template-columns: 1.2fr .8fr; gap:2rem; padding:3rem 0}
+    @media (max-width: 1000px){ .hero-grid{grid-template-columns:1fr} }
+
+    .feature{position:relative; overflow:hidden; border-radius:20px; background:#111}
+    .feature img{width:100%; height:420px; object-fit:cover; display:block; filter:grayscale(.1);}
+    .feature .badge{position:absolute; top:1rem; left:1rem; background:var(--brand); color:#1b1204; font-weight:700; border-radius:999px; padding:.35rem .7rem; font-size:.8rem}
+    .feature .content{position:absolute; inset:auto 0 0 0; padding:1.25rem 1.25rem 1.5rem; background:linear-gradient(180deg,transparent,rgba(0,0,0,.65) 40%, rgba(0,0,0,.9)); color:#fff}
+    .feature h1{font-family:"Playfair Display",serif; font-size:clamp(1.6rem,3vw,2.2rem); margin:0 0 .25rem}
+    .meta{display:flex; gap:.75rem; align-items:center; color:#e5e7eb; font-size:.9rem}
+    .meta time,.meta span{opacity:.9}
+
+    .side-stack{display:grid; gap:1.25rem}
+    .mini{display:grid; grid-template-columns:120px 1fr; gap:1rem; background:var(--card); border:1px solid var(--line); border-radius:16px; overflow:hidden}
+    .mini img{width:100%; height:100%; object-fit:cover}
+    .mini .info{padding:1rem}
+    .kicker{color:var(--brand); font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-size:.75rem}
+    .mini h3{margin:.35rem 0 .25rem; font-size:1.05rem}
+    .tag{display:inline-flex; align-items:center; gap:.35rem; padding:.25rem .6rem; background:#111; color:#fff; border-radius:999px; font-size:.75rem}
+
+    /* Sections */
+    .section{padding:2.5rem 0}
+    .section h2{font-family:"Playfair Display",serif; font-size:clamp(1.4rem,2.5vw,1.9rem); margin:0 0 1.25rem}
+
+    .grid{display:grid; grid-template-columns: repeat(12, 1fr); gap:1.25rem}
+    .card{grid-column: span 4; background:#fff; border:1px solid var(--line); border-radius:18px; overflow:hidden; display:flex; flex-direction:column}
+    .card img{width:100%; height:220px; object-fit:cover}
+    .card .pad{padding:1rem}
+    .card h3{margin:.4rem 0 .5rem; font-size:1.15rem}
+    .card p{color:#4b5563; margin:0 0 .75rem}
+    .card .meta{color:#6b7280}
+    @media (max-width: 1100px){ .card{grid-column: span 6} }
+    @media (max-width: 640px){ .card{grid-column: span 12} }
+
+    /* Timeline */
+    .timeline{position:relative; margin-top:1rem}
+    .timeline::before{content:""; position:absolute; left:10px; top:0; bottom:0; width:2px; background:var(--line)}
+    .event{position:relative; padding-left:2.25rem; margin:1rem 0}
+    .event::before{content:""; position:absolute; left:4px; top:.35rem; width:14px; height:14px; border-radius:50%; background:var(--brand); border:2px solid #fff}
+    .event time{display:inline-block; font-weight:700; color:#111}
+    .event h4{margin:.25rem 0}
+
+    /* Newsletter */
+    .cta{background:linear-gradient(160deg, #faf6ea, #fff)}
+    .cta-inner{display:grid; grid-template-columns: 1.2fr .8fr; gap:2rem; align-items:center; padding:2rem; border:1px dashed var(--brand); border-radius:18px}
+    .cta h3{font-family:"Playfair Display",serif; margin:0 0 .25rem}
+    .cta p{margin:.25rem 0 1rem}
+    .cta form{display:flex; gap:.5rem; flex-wrap:wrap}
+    .cta input[type=email]{flex:1; min-width:240px; padding:.8rem 1rem; border-radius:999px; border:1px solid var(--line)}
+    .cta button{padding:.8rem 1rem; border-radius:999px; background:var(--brand); color:#1b1204; border:0; font-weight:700; cursor:pointer}
+    .cta button:hover{filter:brightness(.95)}
+
+    /* Footer */
+    footer{background:var(--bg); color:#cbd5e1; margin-top:3rem}
+    footer .container{display:grid; grid-template-columns: 1.2fr .8fr; gap:2rem; padding:2rem 0}
+    footer a{color:#e5e7eb; text-decoration:none}
+    footer a:hover{text-decoration:underline}
+    .legal{border-top:1px solid #ffffff1a; padding:1rem 0; color:#94a3b8}
+    @media (max-width: 900px){ footer .container{grid-template-columns:1fr} }
+
+    /* Utility */
+    .pill{display:inline-flex; align-items:center; gap:.4rem; padding:.3rem .65rem; border:1px solid var(--line); border-radius:999px; background:#fff}
+    .row{display:flex; gap:.5rem; align-items:center; flex-wrap:wrap}
+    .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0}
+  </style>
+</head>
+<body>
+  <!-- Topbar / Header -->
+  <header class="topbar" role="banner">
+    <div class="container">
+      <a class="brand" href="#" aria-label="Home">
+        <div class="brand-mark">BT</div>
+        <div class="brand-title">Back‑Then History</div>
+      </a>
+      <nav class="primary" aria-label="Primary">
+        <a href="#features">Features</a>
+        <a href="#eras">Eras</a>
+        <a href="#timelines">Timelines</a>
+        <a href="#topics">Topics</a>
+        <a href="#about">About</a>
+      </nav>
+      <div class="actions">
+        <button class="btn" aria-label="Search">Search</button>
+        <button class="hamburger" aria-expanded="false" aria-controls="mobileMenu" id="burger" title="Menu">☰</button>
+      </div>
+    </div>
+    <div id="mobileMenu" class="mobile-menu" aria-hidden="true" role="dialog">
+      <a href="#features">Features</a>
+      <a href="#eras">Eras</a>
+      <a href="#timelines">Timelines</a>
+      <a href="#topics">Topics</a>
+      <a href="#about">About</a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero container" id="features">
+    <div class="hero-grid">
+      <!-- Featured story -->
+      <article class="feature">
+        <img src="https://images.unsplash.com/photo-1549880338-65ddcdfd017b?q=80&w=1600&auto=format&fit=crop" alt="Vintage city street with tram" />
+        <span class="badge">Feature</span>
+        <div class="content">
+          <div class="row" style="margin-bottom:.4rem">
+            <span class="tag">Urban Past</span>
+            <span class="pill">10 min read</span>
+          </div>
+          <h1>The Day the City Stood Still: A Trolley Strike That Changed Transit</h1>
+          <div class="meta"><time datetime="1905-08-01">Aug 1, 1905</time>•<span>By J. Rivers</span></div>
+        </div>
+      </article>
+
+      <!-- Side stack -->
+      <div class="side-stack">
+        <article class="mini">
+          <img src="https://images.unsplash.com/photo-1601042879364-f3947d3f9a36?q=80&w=1200&auto=format&fit=crop" alt="Old library"/>
+          <div class="info">
+            <div class="kicker">Archives</div>
+            <h3>How a Hidden Ledger Exposed a Century‑Old Mystery</h3>
+            <div class="meta"><time datetime="1923-03-09">Mar 9, 1923</time> • 6 min</div>
+          </div>
+        </article>
+        <article class="mini">
+          <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1200&auto=format&fit=crop" alt="Steam train"/>
+          <div class="info">
+            <div class="kicker">Technology</div>
+            <h3>From Steam to Spark: Rail’s Quiet Revolution</h3>
+            <div class="meta"><time datetime="1910-06-22">Jun 22, 1910</time> • 7 min</div>
+          </div>
+        </article>
+        <article class="mini">
+          <img src="https://images.unsplash.com/photo-1584380931270-1e39f5b08957?q=80&w=1200&auto=format&fit=crop" alt="Vintage camera"/>
+          <div class="info">
+            <div class="kicker">Culture</div>
+            <h3>Snapshots of an Era: When Cameras Met the Crowd</h3>
+            <div class="meta"><time datetime="1934-10-02">Oct 2, 1934</time> • 5 min</div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Latest Articles Grid -->
+  <section class="section container" id="topics" aria-labelledby="latestHeading">
+    <h2 id="latestHeading">Latest Explorations</h2>
+    <div class="grid">
+      <!-- 6 example cards -->
+      <article class="card">
+        <img alt="Typewriter" src="https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1400&auto=format&fit=crop"/>
+        <div class="pad">
+          <div class="row"><span class="tag">Media</span><span class="pill">1896</span></div>
+          <h3>The Letters That Launched a Newspaper Empire</h3>
+          <p>What one editor’s desk revealed about booming print culture.</p>
+          <div class="meta">8 min • By A. DuPont</div>
+        </div>
+      </article>
+
+      <article class="card">
+        <img alt="Harbor" src="https://images.unsplash.com/photo-1468413253725-0d5181091126?q=80&w=1400&auto=format&fit=crop"/>
+        <div class="pad">
+          <div class="row"><span class="tag">Trade</span><span class="pill">1902</span></div>
+          <h3>Harbors of Hope: Immigration at the Turn of the Century</h3>
+          <p>Arrivals, paperwork, and the stories carried ashore.</p>
+          <div class="meta">7 min • By L. Serra</div>
+        </div>
+      </article>
+
+      <article class="card">
+        <img alt="Factory" src="https://images.unsplash.com/photo-1564410267840-53364d6a3288?q=80&w=1400&auto=format&fit=crop"/>
+        <div class="pad">
+          <div class="row"><span class="tag">Industry</span><span class="pill">1913</span></div>
+          <h3>Clockwork Cities: Inside the New Factories</h3>
+          <p>Shifts, whistles, and the architecture of efficiency.</p>
+          <div class="meta">5 min • By M. Patel</div>
+        </div>
+      </article>
+
+      <article class="card">
+        <img alt="Airship" src="https://images.unsplash.com/photo-1519681393781-b4bd1b56f46a?q=80&w=1400&auto=format&fit=crop"/>
+        <div class="pad">
+          <div class="row"><span class="tag">Flight</span><span class="pill">1931</span></div>
+          <h3>Silver Giants: The Promise and Peril of Airships</h3>
+          <p>Elegance in the sky before wings took over.</p>
+          <div class="meta">6 min • By H. Weiss</div>
+        </div>
+      </article>
+
+      <article class="card">
+        <img alt="Street market" src="https://images.unsplash.com/photo-1459535653751-d571815e906b?q=80&w=1400&auto=format&fit=crop"/>
+        <div class="pad">
+          <div class="row"><span class="tag">Daily Life</span><span class="pill">1925</span></div>
+          <h3>Market Days: How Cities Fed Themselves</h3>
+          <p>From dawn deliveries to street‑corner suppers.</p>
+          <div class="meta">4 min • By C. Ramos</div>
+        </div>
+      </article>
+
+      <article class="card">
+        <img alt="Maps" src="https://images.unsplash.com/photo-1502920917128-1aa500764ce7?q=80&w=1400&auto=format&fit=crop"/>
+        <div class="pad">
+          <div class="row"><span class="tag">Cartography</span><span class="pill">1890</span></div>
+          <h3>Drawing the World Anew: The Age of Paper Maps</h3>
+          <p>How atlases reshaped travel and imagination.</p>
+          <div class="meta">9 min • By K. Ito</div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- Eras / Category rail -->
+  <section class="section container" id="eras" aria-labelledby="erasHeading">
+    <h2 id="erasHeading">Browse by Era</h2>
+    <div class="row" style="gap:.75rem; flex-wrap:wrap">
+      <a class="pill" href="#">Victorian</a>
+      <a class="pill" href="#">Progressive Era</a>
+      <a class="pill" href="#">Roaring Twenties</a>
+      <a class="pill" href="#">Interwar</a>
+      <a class="pill" href="#">Post‑War</a>
+      <a class="pill" href="#">Cold War</a>
+      <a class="pill" href="#">Digital Age</a>
+    </div>
+  </section>
+
+  <!-- Timelines -->
+  <section class="section container" id="timelines" aria-labelledby="timelineHeading">
+    <h2 id="timelineHeading">Timelines & Milestones</h2>
+    <div class="timeline">
+      <div class="event">
+        <time>1890</time>
+        <h4>The First Electric Streetcars</h4>
+        <p class="muted">Rapid urban transformation begins as horse‑drawn lines fade.</p>
+      </div>
+      <div class="event">
+        <time>1906</time>
+        <h4>Quake & Rebuild</h4>
+        <p class="muted">Cities learn new lessons in resilience and planning.</p>
+      </div>
+      <div class="event">
+        <time>1927</time>
+        <h4>Radio Everywhere</h4>
+        <p class="muted">The living room becomes a global listening post.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter CTA -->
+  <section class="section cta" aria-labelledby="ctaHeading">
+    <div class="container">
+      <div class="cta-inner">
+        <div>
+          <h3 id="ctaHeading">Get the Past in Your Inbox</h3>
+          <p>Monthly highlights, new discoveries, and stories worth sharing. No spam, ever.</p>
+          <form action="#" method="post" onsubmit="event.preventDefault(); alert('Thanks for subscribing!');">
+            <label for="email" class="sr-only">Email</label>
+            <input id="email" type="email" placeholder="you@example.com" required>
+            <button type="submit">Subscribe</button>
+          </form>
+        </div>
+        <img alt="Decorative vintage collage" style="border-radius:12px; width:100%; max-height:260px; object-fit:cover" src="https://images.unsplash.com/photo-1578926375605-eaf7559b145b?q=80&w=1600&auto=format&fit=crop"/>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer role="contentinfo">
+    <div class="container">
+      <div>
+        <a class="brand" href="#">
+          <div class="brand-mark" style="border-color:#cbd5e1">BT</div>
+          <div class="brand-title">Back‑Then History</div>
+        </a>
+        <p style="max-width:38ch; color:#cbd5e1">Independent stories from the archives. We surface overlooked moments that shaped today.</p>
+      </div>
+      <div>
+        <h4 style="margin:0 0 .5rem; color:#fff">Explore</h4>
+        <nav class="flow" aria-label="Footer">
+          <a href="#features">Features</a>
+          <a href="#eras">Eras</a>
+          <a href="#timelines">Timelines</a>
+          <a href="#topics">Topics</a>
+          <a href="#about">About</a>
+        </nav>
+      </div>
+    </div>
+    <div class="legal">
+      <div class="container" style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap">
+        <small>© <span id="year"></span> Back‑Then Inspired. All rights reserved.</small>
+        <div class="row">
+          <a href="#">Privacy</a>
+          <span aria-hidden="true" style="opacity:.4">•</span>
+          <a href="#">Terms</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu
+    const burger = document.getElementById('burger');
+    const mm = document.getElementById('mobileMenu');
+    burger?.addEventListener('click', () => {
+      const open = mm.classList.toggle('open');
+      burger.setAttribute('aria-expanded', String(open));
+      mm.setAttribute('aria-hidden', String(!open));
+    });
+    // Year stamp
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
