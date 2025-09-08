@@ -23,12 +23,7 @@ Copy this section into article.html
 
   <script>
     // Reuse the same data schema as index.html. In production, fetch from your CMS.
-    const articles = [
-      {id:"silver-giants", title:"Silver Giants: The Promise and Peril of Airships", excerpt:"Elegance aloft before wings took over the skies.", author:"H. Weiss", date:"1931-04-18", image:"https://images.unsplash.com/photo-1519681393781-b4bd1b56f46a?q=80&w=1600&auto=format&fit=crop", tag:"Flight", body:`<p class='dropcap'>In the interwar years, airships hovered between marvel and menace.</p><p>They promised quiet transcontinental travel and a lounge in the clouds. But progress carried risk; each voyage was an experiment in scale and weather.</p><p>By the time wings won the sky, these silver giants had already imprinted the public imagination.</p>`},
-      {id:"city-stood-still", title:"The Day the City Stood Still", excerpt:"A trolley strike ripples through markets, schools, and the evening paper.", author:"J. Rivers", date:"1905-08-01", image:"https://images.unsplash.com/photo-1549880338-65ddcdfd017b?q=80&w=1600&auto=format&fit=crop", tag:"Urban Past", body:`<p class='dropcap'>The strike began before dawn.</p><p>By breakfast, schoolyards were half-empty; by noon, grocers tallied losses; by dusk, the city learned new routes on foot.</p><p>Transit’s pause forced a different rhythm—and revealed who kept a city moving.</p>`},
-      {id:"ledger-in-the-attic", title:"The Ledger in the Attic", excerpt:"A forgotten account book reveals a neighborhood’s hidden network.", author:"R. Patel", date:"1923-03-09", image:"https://images.unsplash.com/photo-1601042879364-f3947d3f9a36?q=80&w=1600&auto=format&fit=crop", tag:"Archives", body:`<p class='dropcap'>Dust rose as the attic opened.</p><p>The ledger traced debts, favors, and gifts—a social web in neat columns.</p><p>Numbers, it turned out, could be intimate.</p>`}
-    ];
-
+    let ARTICLES = [];
     // Parse id from URL
     const params = new URLSearchParams(location.search);
     const id = params.get('id');
