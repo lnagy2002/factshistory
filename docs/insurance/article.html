@@ -23,7 +23,8 @@ Copy this section into article.html
 
   <script>
     // Reuse the same data schema as index.html. In production, fetch from your CMS.
-    let ARTICLES = [];
+    let articles = [];
+    function  render  () {
     // Parse id from URL
     const params = new URLSearchParams(location.search);
     const id = params.get('id');
@@ -51,7 +52,7 @@ Copy this section into article.html
       ${prev?`<a href="article.html?id=${prev.id}"><div class="muted">← Previous</div><div>${prev.title}</div></a>`:''}
       ${next?`<a href="article.html?id=${next.id}"><div class="muted">Next →</div><div>${next.title}</div></a>`:''}
     `;
-
+    }
   </script>
   <script src="shared.js"></script>
 </body>
