@@ -33,7 +33,7 @@ Copy this section into index.html
     // Sample content source (replace with your CMS/JSON feed)
     let articles = [];
 
-    function renderData () {
+    function render () {
     // Sort newest → oldest by date
     const byDateDesc = [...articles].sort((a,b)=> new Date(b.date) - new Date(a.date));
 
