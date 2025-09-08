@@ -11,79 +11,17 @@ Copy this section into article.html
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#0e0f12; --paper:#f7f5ef; --ink:#1c1c1c; --line:#e7e2d6; --brand:#c29a5b; --muted:#6b7280}
-    html,body{height:100%}
-    body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif; background:var(--paper); color:var(--ink); line-height:1.7}
-    .container{width:min(960px,92vw); margin-inline:auto}
-    .topbar{background:var(--bg); color:#fff}
-    .topbar .container{display:flex; align-items:center; justify-content:space-between; padding:.9rem 0}
-    .brand{display:flex; align-items:center; gap:.75rem; text-decoration:none; color:inherit}
-    .brand-mark{width:42px; aspect-ratio:1; border:2px solid #fff; border-radius:999px; display:grid; place-items:center; font-family:"Playfair Display",serif; font-weight:700}
-    .brand-title{font-family:"Playfair Display",serif; font-weight:700; letter-spacing:.4px; font-size:1.25rem}
-
-    .hero-img{width:100%; height:420px; object-fit:cover; display:block; border-bottom:1px solid var(--line)}
-    .article{padding:1.5rem 0 2.5rem}
-    .meta{display:flex; gap:.75rem; align-items:center; color:var(--muted)}
-    h1{font-family:"Playfair Display",serif; font-size:clamp(1.6rem,3vw,2.4rem); line-height:1.2; margin:1rem 0 .5rem}
-    article p{margin:.9rem 0}
-    .dropcap::first-letter{float:left; font-family:"Playfair Display",serif; font-size:3.2rem; line-height:1; padding:.2rem .4rem 0 0; color:#111}
-
-    .byline{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:.75rem; border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:.75rem 0; margin:1rem 0}
-    .tags{display:flex; flex-wrap:wrap; gap:.5rem}
-    .tag{display:inline-flex; padding:.25rem .6rem; border-radius:999px; background:#111; color:#fff; font-size:.8rem}
-
-    .prevnext{display:flex; gap:1rem; margin-top:2rem}
-    .prevnext a{flex:1; text-decoration:none; border:1px solid var(--line); border-radius:12px; padding:1rem; display:block}
-    .muted{color:var(--muted)}
-
-    footer{background:var(--bg); color:#cbd5e1; margin-top:2.5rem}
-    footer .container{display:grid; grid-template-columns:1fr 1fr; gap:2rem; padding:2rem 0}
-    .legal{border-top:1px solid #ffffff1a; padding:1rem 0}
-  </style>
+  <link rel="stylesheet" href="style.css">
+  
 </head>
 <body>
-  <header class="topbar">
-    <div class="container">
-      <a class="brand" href="index.html" aria-label="Home">
-        <div class="brand-mark">BT</div>
-        <div class="brand-title">Back‑Then History</div>
-      </a>
-      <nav class="primary" style="display:flex; gap:1.25rem">
-        <a href="index.html" style="color:#d7dbe7; text-decoration:none">Home</a>
-        <a href="articles.html" style="color:#d7dbe7; text-decoration:none">Articles</a>
-      </nav>
-    </div>
-  </header>
+  <div id="header"></div>
 
   <main id="post" class="container article" aria-live="polite">
     <!-- content injected by JS below -->
   </main>
 
-  <footer>
-    <div class="container">
-      <div>
-        <a class="brand" href="index.html" style="text-decoration:none; color:inherit">
-          <div class="brand-mark" style="border-color:#cbd5e1">BT</div>
-          <div class="brand-title">Back‑Then History</div>
-        </a>
-        <p style="max-width:40ch">Stories from the archives, told with care.</p>
-      </div>
-      <div>
-        <h4 style="margin:.25rem 0 .5rem; color:#fff; font-family:'Playfair Display',serif">Explore</h4>
-        <nav style="display:flex; gap:1rem">
-          <a href="index.html" style="color:#e5e7eb; text-decoration:none">Home</a>
-          <a href="articles.html" style="color:#e5e7eb; text-decoration:none">Articles</a>
-        </nav>
-      </div>
-    </div>
-    <div class="legal">
-      <div class="container" style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap">
-        <small>© <span id="year"></span> Back‑Then Inspired.</small>
-        <small class="muted">Read widely, think deeply.</small>
-      </div>
-    </div>
-  </footer>
+  <div id="footer"></div>
 
   <script>
     // Reuse the same data schema as index.html. In production, fetch from your CMS.
