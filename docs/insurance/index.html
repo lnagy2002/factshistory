@@ -32,6 +32,8 @@ Copy this section into index.html
   <script>
     // Sample content source (replace with your CMS/JSON feed)
     let articles = [];
+
+    function renderData () {
     // Sort newest → oldest by date
     const byDateDesc = [...articles].sort((a,b)=> new Date(b.date) - new Date(a.date));
 
@@ -64,7 +66,11 @@ Copy this section into index.html
         </div>`;
       grid.appendChild(card);
     });
+    }
   </script>
   <script src="shared.js"></script>
+  <script>
+    renderData  ();
+  </script>
 </body>
 </html>
