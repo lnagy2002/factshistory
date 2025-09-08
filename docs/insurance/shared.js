@@ -18,4 +18,4 @@ async function loadData() {
     }
 }
 
-await loadData ();
+loadData ();
