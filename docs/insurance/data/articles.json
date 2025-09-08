@@ -5,4 +5,4 @@
       {id:"from-steam-to-spark", title:"From Steam to Spark", excerpt:"How electrification quietly reshaped freight and passenger lines.", author:"A. Chen", date:"1910-06-22", image:"https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1600&auto=format&fit=crop", tag:"Technology"},
       {id:"market-days", title:"Market Days: How Cities Fed Themselves", excerpt:"Dawn deliveries, midday haggles, and the supper bell’s call.", author:"C. Ramos", date:"1925-07-12", image:"https://images.unsplash.com/photo-1459535653751-d571815e906b?q=80&w=1600&auto=format&fit=crop", tag:"Daily Life"},
       {id:"drawing-the-world-anew", title:"Drawing the World Anew", excerpt:"Paper maps as tools for travel—and imagination.", author:"K. Ito", date:"1890-02-03", image:"https://images.unsplash.com/photo-1502920917128-1aa500764ce7?q=80&w=1600&auto=format&fit=crop", tag:"Cartography"}
-    ];
+    ]
