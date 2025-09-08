@@ -1,0 +1,11 @@
+{
+  "name": "daily-ai-json",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "insurance": "node scripts/generate-insurance.js"
+  },
+  "dependencies": {
+    "openai": "^4.0.0"
+  }
+}
