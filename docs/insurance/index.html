@@ -31,15 +31,7 @@ Copy this section into index.html
   
   <script>
     // Sample content source (replace with your CMS/JSON feed)
-    const articles = [
-      {id:"silver-giants", title:"Silver Giants: The Promise and Peril of Airships", excerpt:"Elegance aloft before wings took over the skies.", author:"H. Weiss", date:"1931-04-18", image:"https://images.unsplash.com/photo-1519681393781-b4bd1b56f46a?q=80&w=1600&auto=format&fit=crop", tag:"Flight"},
-      {id:"city-stood-still", title:"The Day the City Stood Still", excerpt:"A trolley strike ripples through markets, schools, and the evening paper.", author:"J. Rivers", date:"1905-08-01", image:"https://images.unsplash.com/photo-1549880338-65ddcdfd017b?q=80&w=1600&auto=format&fit=crop", tag:"Urban Past"},
-      {id:"ledger-in-the-attic", title:"The Ledger in the Attic", excerpt:"A forgotten account book reveals a neighborhood’s hidden network.", author:"R. Patel", date:"1923-03-09", image:"https://images.unsplash.com/photo-1601042879364-f3947d3f9a36?q=80&w=1600&auto=format&fit=crop", tag:"Archives"},
-      {id:"from-steam-to-spark", title:"From Steam to Spark", excerpt:"How electrification quietly reshaped freight and passenger lines.", author:"A. Chen", date:"1910-06-22", image:"https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1600&auto=format&fit=crop", tag:"Technology"},
-      {id:"market-days", title:"Market Days: How Cities Fed Themselves", excerpt:"Dawn deliveries, midday haggles, and the supper bell’s call.", author:"C. Ramos", date:"1925-07-12", image:"https://images.unsplash.com/photo-1459535653751-d571815e906b?q=80&w=1600&auto=format&fit=crop", tag:"Daily Life"},
-      {id:"drawing-the-world-anew", title:"Drawing the World Anew", excerpt:"Paper maps as tools for travel—and imagination.", author:"K. Ito", date:"1890-02-03", image:"https://images.unsplash.com/photo-1502920917128-1aa500764ce7?q=80&w=1600&auto=format&fit=crop", tag:"Cartography"}
-    ];
-
+    let ARTICLES = [];
     // Sort newest → oldest by date
     const byDateDesc = [...articles].sort((a,b)=> new Date(b.date) - new Date(a.date));
 
