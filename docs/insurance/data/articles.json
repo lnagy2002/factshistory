@@ -28,59 +28,5 @@
       "Beginner Guide"
     ],
     "body": "<h2>What is Health Insurance?</h2><p>Health insurance is a type of coverage that pays for medical and surgical expenses incurred by the insured. It can also provide a range of additional benefits, such as preventive care, mental health services, and prescription drug coverage.</p>\n\n<h2>Key Terms to Know</h2><h3>Premium</h3><p>The premium is the amount you pay for your health insurance every month. This is a fixed cost that does not change based on how often you use your insurance.</p>\n\n<h3>Deductible</h3><p>A deductible is the amount you pay out-of-pocket for healthcare services before your insurance kicks in. For example, if your deductible is $1,000, you will pay the first $1,000 of your medical expenses before your insurer starts to pay.</p>\n\n<h3>Copayment and Coinsurance</h3><ul>\n  <li><strong>Copayment:</strong> A copayment is a fixed fee you pay for certain services, like a doctor’s visit. For instance, you might pay $20 when you see your doctor.</li>\n  <li><strong>Coinsurance:</strong> Coinsurance is the percentage of costs you pay after you have met your deductible. If your coinsurance is 20%, and you have met your deductible, you will pay 20% of the covered costs for services.</li>\n</ul>\n\n<h2>Types of Health Insurance Plans</h2><h3>Health Maintenance Organization (HMO)</h3><p>HMO plans require members to choose a primary care physician (PCP) and get referrals to see specialists. They typically have lower premiums but less flexibility in choosing providers.</p>\n\n<h3>Preferred Provider Organization (PPO)</h3><p>PPO plans offer more flexibility when choosing healthcare providers and do not require referrals. However, they usually have higher premiums and deductibles.</p>\n\n<h3>Exclusive Provider Organization (EPO)</h3><p>EPO plans cover only services provided by doctors and hospitals in the plan's network. They do not cover out-of-network care except in emergencies.</p>\n\n<h2>Understanding Your Coverage</h2><p>It's crucial to fully grasp your health insurance policy to make the most of your coverage. Here are some tips:</p>\n<ul>\n  <li>Read your policy documents thoroughly to understand what is covered and what is not.</li>\n  <li>Keep track of your healthcare expenses to know when you reach your deductible.</li>\n  <li>Utilize preventive services that are often covered at no cost.</li>\n</ul>\n\n<h2>Common Health Insurance Myths</h2><h3>Myth 1: Health Insurance is Only for Serious Illnesses</h3><p>Many people believe that health insurance is only necessary for catastrophic events, but it also covers routine check-ups and preventive care.</p>\n\n<h3>Myth 2: You Can Only Get Health Insurance During Open Enrollment</h3><p>While open enrollment is the primary time to sign up for health insurance, you may qualify for a special enrollment period due to life events like marriage or having a baby.</p>\n\n<h3>Myth 3: All Healthcare Providers Accept All Insurance Plans</h3><p>Not all healthcare providers accept every insurance plan, so it's essential to ensure that your chosen provider is in-network to minimize costs.</p>\n\n<h2>Conclusion</h2><p>Understanding health insurance can empower you to make informed decisions about your healthcare. By familiarizing yourself with key terms, types of plans, and common myths, you can navigate the healthcare landscape more effectively.</p>\n<p>This is general information, not individualized advice.</p>"
-  },
-  {
-    "id": "silver-giants",
-    "title": "Silver Giants: The Promise and Peril of Airships",
-    "excerpt": "Elegance aloft before wings took over the skies.",
-    "author": "H. Weiss",
-    "date": "1931-04-18",
-    "image": "https://images.unsplash.com/photo-1519681393781-b4bd1b56f46a?q=80&w=1600&auto=format&fit=crop",
-    "tag": "Flight"
-  },
-  {
-    "id": "market-days",
-    "title": "Market Days: How Cities Fed Themselves",
-    "excerpt": "Dawn deliveries, midday haggles, and the supper bell’s call.",
-    "author": "C. Ramos",
-    "date": "1925-07-12",
-    "image": "https://images.unsplash.com/photo-1459535653751-d571815e906b?q=80&w=1600&auto=format&fit=crop",
-    "tag": "Daily Life"
-  },
-  {
-    "id": "ledger-in-the-attic",
-    "title": "The Ledger in the Attic",
-    "excerpt": "A forgotten account book reveals a neighborhood’s hidden network.",
-    "author": "R. Patel",
-    "date": "1923-03-09",
-    "image": "https://images.unsplash.com/photo-1601042879364-f3947d3f9a36?q=80&w=1600&auto=format&fit=crop",
-    "tag": "Archives"
-  },
-  {
-    "id": "from-steam-to-spark",
-    "title": "From Steam to Spark",
-    "excerpt": "How electrification quietly reshaped freight and passenger lines.",
-    "author": "A. Chen",
-    "date": "1910-06-22",
-    "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1600&auto=format&fit=crop",
-    "tag": "Technology"
-  },
-  {
-    "id": "city-stood-still",
-    "title": "The Day the City Stood Still",
-    "excerpt": "A trolley strike ripples through markets, schools, and the evening paper.",
-    "author": "J. Rivers",
-    "date": "1905-08-01",
-    "image": "https://images.unsplash.com/photo-1549880338-65ddcdfd017b?q=80&w=1600&auto=format&fit=crop",
-    "tag": "Urban Past"
-  },
-  {
-    "id": "drawing-the-world-anew",
-    "title": "Drawing the World Anew",
-    "excerpt": "Paper maps as tools for travel—and imagination.",
-    "author": "K. Ito",
-    "date": "1890-02-03",
-    "image": "https://images.unsplash.com/photo-1502920917128-1aa500764ce7?q=80&w=1600&auto=format&fit=crop",
-    "tag": "Cartography"
   }
 ]
