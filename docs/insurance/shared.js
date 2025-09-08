@@ -12,6 +12,7 @@ async function loadData() {
         const res = await fetch('https://lnagy2002.github.io/factshistory/insurance/data/articles.json'); // <-- your JSON file
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         articles = await res.json();  
+        render();
     } catch (err) {
       console.error  (err);
     }
