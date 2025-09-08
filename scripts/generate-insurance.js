@@ -13,9 +13,10 @@
  *  - ./articles.json   (array of articles used by your site)
  */
 
-const fs = require('node:fs');
-const path = require('node:path');
-const crypto = require('node:crypto');
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import OpenAI from "openai";
 
 const outDir  = path.join(process.cwd(), "docs", "insurance", "data");
 const ARTICLES_PATH = path.resolve(outDir, 'articles.json');
