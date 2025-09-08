@@ -1,10 +1,8 @@
-
-async function loadShared(){
-const header = await fetch('header.html').then(r=>r.text());
-const footer = await fetch('footer.html').then(r=>r.text());
-document.getElementById('header').innerHTML = header;
-document.getElementById('footer').innerHTML = footer;
-document.getElementById('year').textContent = new Date().getFullYear();
-}
-loadShared();
-
+(async () => {
+  const headerHtml = await fetch('partials/header.html').then(r => r.text());
+  const footerHtml = await fetch('partials/footer.html').then(r => r.text());
+  document.getElementById('header').innerHTML = headerHtml;
+  document.getElementById('footer').innerHTML = footerHtml;
+  const y = document.getElementById('year');
+  if (y) y.textContent = new Date().getFullYear();
+})();
