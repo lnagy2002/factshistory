@@ -61,34 +61,89 @@ function stripFences(s) {
 // --- Build the LLM prompt --------------------------------------------------
 
 function buildDailyPrompt() {
+  const todayISO = new Date().toISOString().split("T")[0];
+
   return `
-You are an insurance content writer. Generate ONE fresh article every day on a rotating insurance topic.
+You are an experienced insurance content writer specializing in educational content for the general public.
 
-Constraints
-- Target: general audience in the US; educational, neutral tone. Include a one-line disclaimer: “This is general information, not individualized advice.”
-- Length: ~900–1,200 words.
-- Structure: title, 1–2 sentence excerpt, body with H2/H3 subheads, bullets, and a short FAQ (3 Q&As).
-- Variation: Use today’s date as a seed (${todayISO}) to pick a different topic + angle (beginner guide, checklist, myth-busting, scenario, claims tips, underwriting basics).
-- Avoid specifics that can change (prices, state-by-state laws, insurer names, legal citations).
-- Tags: choose 1 primary + 2–4 secondary tags from:
-  ["Auto Insurance","Homeowners Insurance","Renters Insurance","Health Insurance","Life Insurance","Disability Insurance","Travel Insurance","Pet Insurance","Business Insurance","Cyber Insurance","Liability Insurance","Flood Insurance","Boat Insurance","Motorcycle Insurance"]
-- Image sourcing: DO NOT invent URLs. Return 3 image_keywords (specific to the topic) suitable for searching a CC0/public-domain index (e.g., Openverse with license=cc0 or Public Domain Mark).
+Task:
+Generate ONE new, original, high-quality article each day on a rotating insurance-related topic.
 
-Output
-Return ONLY valid JSON (no markdown fences) with:
+🎯 Guidelines
+
+Audience & Tone:
+- Target: general audience in the United States
+- Tone: educational, approachable, neutral, and accurate
+- Always include this disclaimer at the end:
+  “This is general information, not individualized advice.”
+
+Length:
+- Approximately 900–1,200 words
+
+Structure:
+1. Title — clear, descriptive, and engaging
+2. Excerpt — 1–2 sentences summarizing the main takeaway
+3. Body — well-organized with:
+   - H2 and H3 subheadings
+   - Short paragraphs
+   - Bulleted or numbered lists where helpful
+4. FAQ — include 3 short Q&As clarifying key points
+
+Topic Rotation & Freshness:
+- Use today’s date (${todayISO}) as a seed to ensure a unique topic and angle.
+- Vary content daily by switching between:
+  • Beginner’s guides
+  • Step-by-step checklists
+  • Myth-busting explainers
+  • Real-world claim scenarios
+  • Risk management or underwriting basics
+  • Policy comparison frameworks
+  • Preventive tips and coverage optimization strategies
+
+Content Boundaries:
+Avoid:
+- Premium prices or price quotes
+- Specific insurer or company names
+- State-by-state or legal references
+- Personalized financial or legal advice
+- Any data that can become outdated
+Ensure information remains evergreen and factual.
+
+Tags:
+- Generate 3–6 relevant tags based on the article’s content.
+- Tags should stay related to insurance but are not restricted to a fixed list.
+- Examples:
+  "Auto Insurance", "Home Coverage", "Health Policy", "Risk Management",
+  "Claims Process", "Policy Renewal", "Small Business Coverage", "Insurance Literacy",
+  "Cyber Protection", "Travel Safety", "Pet Coverage", etc.
+
+Image Sourcing & Validation:
+- DO NOT invent URLs or include copyrighted material.
+- Return 3 descriptive image_keywords suitable for searching CC0/public-domain sources (e.g., Openverse, Pixabay Public Domain).
+- Each image must:
+  1. Be valid and retrievable (no 404 or invalid files)
+  2. Contain no public personalities or branded elements
+  3. Not duplicate images used in previous articles
+  4. Be high-resolution and visually relevant to the topic
+  5. Match a professional, neutral insurance tone
+
+Output:
+Return ONLY valid JSON (no markdown fences) with the following structure:
+
 {
   "id": "kebab-case-slug-of-title",
-  "title": "Title case",
+  "title": "Title Case",
   "excerpt": "1–2 sentence summary.",
   "author": "Staff Writer",
   "date": "${todayISO}",
-  "primary_tag": "(one taxonomy value)",
-  "tags": ["..."],
+  "primary_tag": "(main tag)",
+  "tags": ["tag1","tag2","tag3"],
   "image_keywords": ["kw1","kw2","kw3"],
   "body_html": "<p>Full HTML article…</p>"
 }
 `.trim();
 }
+
 
 // --- Call the LLM (OpenAI example; swap out if you use another) ------------
 
