@@ -121,11 +121,14 @@ Tags:
 Image Sourcing & Validation:
 - DO NOT invent URLs or include copyrighted material.
 - Return 3 descriptive image_keywords suitable for searching CC0/public-domain sources (e.g., Openverse, Pixabay Public Domain).
+- Prefer **illustrated, concept-style, or infographic-like images**, similar in aesthetic to:
+  https://www.primeres.com/images/librariesprovider868/04_about-us/06_blog/bloghomeinsurancebasics.png
+- Avoid real-life photos showing identifiable people, houses, buildings, or branded objects.
 - Each image must:
   1. Be valid and retrievable (no 404 or invalid files)
-  2. Contain no public personalities or branded elements
+  2. Contain no public personalities or logos
   3. Not duplicate images used in previous articles
-  4. Be high-resolution and visually relevant to the topic
+  4. Be high-resolution and stylistically consistent (clean vector/illustration look)
   5. Match a professional, neutral insurance tone
 
 Output:
