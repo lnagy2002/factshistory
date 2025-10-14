@@ -15,6 +15,7 @@
 
 import fs from "fs";
 import path from "path";
+import crypto from "crypto";
 import { fileURLToPath } from "url";
 import OpenAI from "openai";
 
