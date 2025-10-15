@@ -217,7 +217,6 @@ async function generateIllustrations({ title, primaryTag, tags, dateISO, count =
 
   const out = [];
   for (let i = 0; i < count; i++) {
-    // Small per-image variation, with seed baked into filename
     const prompt = `${promptBase}\nVariant ${i + 1}. Focus: ${(tags && tags[i]) || primaryTag || "insurance concept"}.`;
     const filename = `${slug}-${dateISO}-${i + 1}.png`;
     const filepath = path.join(IMG_DIR, filename);
@@ -227,11 +226,11 @@ async function generateIllustrations({ title, primaryTag, tags, dateISO, count =
         model: "gpt-image-1",
         prompt,
         size: `${width}x${height}`,
-        n: 1,
-        response_format: "b64_json"
+        n: 1
+        // ❌ remove: response_format: "b64_json"
       });
 
-      const b64 = resp.data?.[0]?.b64_json;
+      const b64 = resp.data?.[0]?.b64_json;   // ✅ still present by default
       if (!b64) throw new Error("No image data returned");
       const buf = Buffer.from(b64, "base64");
       await fsp.writeFile(filepath, buf);
@@ -243,7 +242,7 @@ async function generateIllustrations({ title, primaryTag, tags, dateISO, count =
         source: "gpt-image-1"
       });
     } catch (err) {
-      console.log   (err)
+      console.log (err);
       // Fallback: Picsum (always 200 OK)
       out.push({
         url: `https://picsum.photos/seed/${slug}-${dateISO}-${i + 1}/${width}/${height}`,
