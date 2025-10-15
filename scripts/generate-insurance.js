@@ -288,6 +288,7 @@ async function fetchPixabayIllustrations({ title, primaryTag, tags, dateISO, cou
       });
     } catch (err) {
       // Slot fallback
+      console.log   (err);
       out.push({
         url: `https://picsum.photos/seed/${baseSlug}/1200/800`,
         alt: `abstract insurance concept (${idx})`,
@@ -325,7 +326,6 @@ async function fetchPixabayIllustrations({ title, primaryTag, tags, dateISO, cou
     author: draft.author,
     date: draft.date,
     image: images[0]?.url || "",
-    images,
     tag: draft.primary_tag,
     tags: draft.tags || [],
     body: draft.body_html,
