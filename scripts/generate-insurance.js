@@ -401,7 +401,6 @@ async function fetchPixabayIllustrations({ title, primaryTag, tags, dateISO, cou
     author: draft.author,
     date: draft.date,
     image: images[0]?.url || "",
-    images,
     tag: draft.primary_tag,
     tags: draft.tags || [],
     body: draft.body_html,
@@ -420,7 +419,7 @@ async function fetchPixabayIllustrations({ title, primaryTag, tags, dateISO, cou
   writeArticles(next);
 
   console.log("✅ Created article:", record.title, "→", record.id);
-  console.log("🖼  Images:", record.images?.map(i => i.url).join(", "));
+  console.log("🖼  Images:", images[0]?.url || "");
 })().catch(err => {
   console.error("❌ Generation failed:", err);
   process.exitCode = 1;
