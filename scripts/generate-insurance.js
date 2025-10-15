@@ -216,6 +216,7 @@ function buildPixabayQuery({ title, primary_tag, tags }) {
 
 async function pixabaySearch({ query, perPage = 20 }) {
   if (!PIXABAY_API_KEY) return [];
+  console.log ("Search Pizabay")
   const url = new URL("https://pixabay.com/api/");
   url.searchParams.set("key", PIXABAY_API_KEY);
   url.searchParams.set("q", query);
@@ -226,9 +227,11 @@ async function pixabaySearch({ query, perPage = 20 }) {
   const res = await fetch(url.toString());
   if (!res.ok) {
     const t = await res.text().catch(() => "");
+    console.log  (`Pixabay API ${res.status}: ${t}`)
     throw new Error(`Pixabay API ${res.status}: ${t}`);
   }
   const data = await res.json();
+  console.log  ("Pixabay data ", data);
   return data.hits || [];
 }
 
@@ -252,7 +255,7 @@ async function fetchPixabayIllustrations({ title, primaryTag, tags, dateISO, cou
       license: "Placeholder",
     }));
   }
-
+console.log ("fetchPixabayIllustrations")
   const query = buildPixabayQuery({ title, primary_tag: primaryTag, tags });
   const hits = await pixabaySearch({ query, perPage: Math.max(30, count) });
   const ranked = rankPixabayHits(hits).slice(0, count);
@@ -277,7 +280,7 @@ async function fetchPixabayIllustrations({ title, primaryTag, tags, dateISO, cou
       const filepath = path.join(IMG_DIR, filename);
 
       await downloadToFile(src, filepath);
-
+console.log ("file  downloaded")
       out.push({
         url: `${IMG_BASE_URL}/${filename}`,
         alt: (r?.tags || "insurance illustration").slice(0, 140),
