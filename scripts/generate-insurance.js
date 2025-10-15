@@ -270,8 +270,8 @@ async function generateIllustrations({ title, primaryTag, tags, dateISO, count =
     tags: draft.tags,
     dateISO: draft.date,
     count: 3,
-    width: 1200,
-    height: 800
+    width: 1024,
+    height: 1024
   });
 
   // 3) Map to your site’s schema (keep first as main image; store all in images)
