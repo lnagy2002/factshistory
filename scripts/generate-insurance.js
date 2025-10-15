@@ -235,9 +235,10 @@ async function deepaiGenerateOneImage({ prompt, filenameBase }) {
     headers: { "api-key": DEEPAI_API_KEY },
     body: form
   });
-
+console.log ("called  deepai")
   if (!resp.ok) {
     const t = await resp.text().catch(() => "");
+console.log ("  deepai call failed", `DeepAI ${resp.status}: ${t.slice(0, 160)}`)
     throw new Error(`DeepAI ${resp.status}: ${t.slice(0, 160)}`);
   }
 
@@ -285,7 +286,8 @@ async function generateDeepAIIllustrations({ title, excerpt, primaryTag, tags, b
         source: "DeepAI Text2Img",
         license: "DeepAI Terms"
       });
-    } catch {
+    } catch (err) {
+      console.log ("failed  to generate image", err);
       // slot fallback
       out.push({
         url: `https://picsum.photos/seed/${filenameBase}/1200/800`,
