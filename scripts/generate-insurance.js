@@ -245,7 +245,7 @@ function rankPixabayHits(hits) {
 }
 
 async function fetchPixabayIllustrations({ title, primaryTag, tags, dateISO, count = 3 }) {
-  console.log (PIXABAY_API_KEY);
+  console.log ("PIXABAY_API_KEY>", PIXABAY_API_KEY);
   if (!PIXABAY_API_KEY) {
     // No key → Picsum fallback
     const slug = slugify(title || primaryTag || (tags && tags[0]) || "insurance");
