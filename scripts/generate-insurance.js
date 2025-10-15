@@ -28,7 +28,7 @@ const LLM_MODEL = process.env.LLM_MODEL || "gpt-4o-mini";
 const DATA_DIR = path.join(process.cwd(), "docs", "insurance", "data");
 const ARTICLES_PATH = path.join(DATA_DIR, "articles.json");
 const IMG_DIR = process.env.IMG_DIR || path.join(process.cwd(), "docs", "insurance", "images");
-const IMG_BASE_URL = (process.env.IMG_BASE_URL || "/insurance/images").replace(/\/$/, "");
+const IMG_BASE_URL = (process.env.IMG_BASE_URL || "/factsthistory/insurance/images").replace(/\/$/, "");
 
 const todayISO = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
@@ -335,7 +335,6 @@ async function generateDeepAIIllustrations({ title, excerpt, primaryTag, tags, b
     author: draft.author,
     date: draft.date,
     image: images[0]?.url || "",
-    images,
     tag: draft.primary_tag,
     tags: draft.tags || [],
     body: draft.body_html
@@ -354,7 +353,7 @@ async function generateDeepAIIllustrations({ title, excerpt, primaryTag, tags, b
   writeArticles(next);
 
   console.log("✅ Created article:", record.title, "→", record.id);
-  console.log("🖼  Images:", record.images?.map(i => i.url).join(", "));
+  console.log("🖼  Image:", record.image?.map(i => i.url).join(", "));
 })().catch(err => {
   console.error("❌ Generation failed:", err);
   process.exitCode = 1;
