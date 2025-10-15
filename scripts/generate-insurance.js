@@ -353,7 +353,7 @@ async function generateDeepAIIllustrations({ title, excerpt, primaryTag, tags, b
   writeArticles(next);
 
   console.log("✅ Created article:", record.title, "→", record.id);
-  console.log("🖼  Image:", record.image?.map(i => i.url).join(", "));
+  console.log("🖼  Image:", record.image?.url);
 })().catch(err => {
   console.error("❌ Generation failed:", err);
   process.exitCode = 1;
