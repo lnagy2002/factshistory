@@ -210,15 +210,17 @@ function extractH2Topics(html = "") {
 function buildDeepAIPrompt({ title, excerpt, primaryTag, tags, body_html }) {
   const keywords = [primaryTag, ...(tags || [])].filter(Boolean).slice(0, 6).join(", ");
   const ideas = extractH2Topics(body_html).join(", ");
-  return `A clean flat vector illustration symbolizing ${primaryTag || "insurance coverage"}, no text, no logos, no people, modern infographic style`;
-    
-  // [
-  //   `Flat vector / infographic-style illustration about: ${keywords || "insurance coverage"}.`,
-  //   `Title cue: ${title}.`,
-  //   excerpt ? `Summary: ${excerpt}` : "",
-  //   ideas ? `Key ideas: ${ideas}` : "",
-  //   "Requirements: minimal, professional, neutral; no text, no brand logos, no real people or buildings; clean shapes; high contrast; educational tone."
-  // ].filter(Boolean).join(" ");
+  return 
+  [
+    `GENERATE REALISTIC IMAGE OR INF_GRAPHICS SYMBOLIZING ${primaryTag || "insurance coverage"}.`,
+    `Provide an image response only, without any text or description`,
+    `HIGH-RESOLUTION PHOTO`,
+    `PHOTOGRAPHIC RESPONSE ONLY`
+    // `Title cue: ${title}.`,
+    // excerpt ? `Summary: ${excerpt}` : "",
+    // ideas ? `Key ideas: ${ideas}` : "",
+    // "Requirements: minimal, professional, neutral; no text, no brand logos, no real people or buildings; clean shapes; high contrast; educational tone."
+  ].filter(Boolean).join(" ");
 }
 
 // DeepAI requires width/height multiples of 32 (recommend staying <= 1024). :contentReference[oaicite:2]{index=2}
@@ -240,10 +242,8 @@ async function deepaiGenerateOneImage({ prompt, filenameBase }) {
     headers: { "api-key": DEEPAI_API_KEY },
     body: form
   });
-console.log ("called  deepai")
   if (!resp.ok) {
     const t = await resp.text().catch(() => "");
-console.log ("  deepai call failed", `DeepAI ${resp.status}: ${t.slice(0, 160)}`)
     throw new Error(`DeepAI ${resp.status}: ${t.slice(0, 160)}`);
   }
 
@@ -278,7 +278,8 @@ async function generateDeepAIIllustrations({ title, excerpt, primaryTag, tags, b
   const out = [];
   for (let i = 0; i < count; i++) {
     const idx = i + 1;
-    const filenameBase = `${baseTopic}-${dateISO.replace(/-/g, "")}-${idx}`;
+    const timestamp = Math.floor(Date.now() / 1000); // seconds
+    const filenameBase = `${baseTopic}-${dateISO.replace(/-/g, "")}-${idx}-${timestamp}`;
     // slight per-image focus shift using tags
     const focus = (tags && tags[i]) ? ` Focus on: ${tags[i]}.` : "";
     const prompt = `${promptBase}${focus}`;
