@@ -209,7 +209,7 @@ Title cue: ${title}.
 `.trim();
 }
 
-async function generateIllustrations({ title, primaryTag, tags, dateISO, count = 1, width = 1200, height = 800 }) {
+async function generateIllustrations({ title, primaryTag, tags, dateISO, count = 1, width = 1024, height = 1536 }) {
   await ensureDir(IMG_DIR);
 
   const slug = slugify(title || primaryTag || (tags && tags[0]) || "insurance");
