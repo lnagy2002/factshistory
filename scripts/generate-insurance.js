@@ -209,7 +209,7 @@ Title cue: ${title}.
 `.trim();
 }
 
-async function generateIllustrations({ title, primaryTag, tags, dateISO, count = 3, width = 1200, height = 800 }) {
+async function generateIllustrations({ title, primaryTag, tags, dateISO, count = 1, width = 1200, height = 800 }) {
   await ensureDir(IMG_DIR);
 
   const slug = slugify(title || primaryTag || (tags && tags[0]) || "insurance");
@@ -243,6 +243,7 @@ async function generateIllustrations({ title, primaryTag, tags, dateISO, count =
         source: "gpt-image-1"
       });
     } catch (err) {
+      console.log   (err)
       // Fallback: Picsum (always 200 OK)
       out.push({
         url: `https://picsum.photos/seed/${slug}-${dateISO}-${i + 1}/${width}/${height}`,
@@ -282,7 +283,6 @@ async function generateIllustrations({ title, primaryTag, tags, dateISO, count =
     author: draft.author,
     date: draft.date,
     image: images[0]?.url,       // primary image for listing
-    images,                      // keep full set if your site uses a gallery
     tag: draft.primary_tag,      // primary tag for grid
     tags: draft.tags || [],      // all tags
     body: draft.body_html        // article HTML
