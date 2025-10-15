@@ -1,37 +1,32 @@
 /**
- * daily_insurance_article.js  (Pixabay + safe query)
+ * daily_insurance_article.js — DeepAI Text2Img edition
  *
- * - Calls an LLM to generate a strict-JSON insurance article
- * - Fetches 3 illustration-style images from Pixabay (download + self-host)
- * - Writes/updates ./docs/insurance/data/articles.json (newest → oldest)
- * - Stores images under ./docs/insurance/images (or IMG_DIR)
- *
- * Requires: Node 18+ (global fetch)
+ * - Generates one insurance article (strict JSON) via OpenAI
+ * - Generates 3 illustration-style images via DeepAI Text2Img
+ * - Saves images under ./docs/insurance/images (self-hosted)
+ * - Appends/updates ./docs/insurance/data/articles.json (newest → oldest)
  *
  * Env:
- *  - OPENAI_API_KEY=...                 (required for text)
- *  - PIXABAY_API_KEY=...                (required for images)
- *  - LLM_MODEL=gpt-4o-mini              (optional, default gpt-4o-mini)
+ *  - OPENAI_API_KEY=...                 (required)
+ *  - DEEPAI_API_KEY=...                 (required for DeepAI images)
+ *  - LLM_MODEL=gpt-4o-mini              (optional)
  *  - IMG_DIR=docs/insurance/images      (optional)
- *  - IMG_BASE_URL=/insurance/images     (optional; can be a full CDN URL)
+ *  - IMG_BASE_URL=/insurance/images     (optional; can be full CDN URL)
  */
 
-// import 'dotenv/config'; // ← uncomment if you want to load a local .env
+// import 'dotenv/config'; // uncomment if you want .env locally
 
 import fs from "fs";
 import fsp from "fs/promises";
 import path from "path";
 import crypto from "crypto";
 
-// -------------------- config --------------------
-
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
+const DEEPAI_API_KEY = process.env.DEEPAI_API_KEY || "";
 const LLM_MODEL = process.env.LLM_MODEL || "gpt-4o-mini";
-const PIXABAY_API_KEY = process.env.PIXABAY_API_KEY || "";
 
 const DATA_DIR = path.join(process.cwd(), "docs", "insurance", "data");
 const ARTICLES_PATH = path.join(DATA_DIR, "articles.json");
-
 const IMG_DIR = process.env.IMG_DIR || path.join(process.cwd(), "docs", "insurance", "images");
 const IMG_BASE_URL = (process.env.IMG_BASE_URL || "/insurance/images").replace(/\/$/, "");
 
@@ -90,10 +85,10 @@ async function downloadToFile(url, filepath, { retries = 2 } = {}) {
   }
 }
 
-// -------------------- prompt --------------------
+// -------------------- prompt (unchanged structure) --------------------
 
 function buildDailyPrompt() {
-  const todayISO = new Date().toISOString().split("T")[0];
+  const d = new Date().toISOString().split("T")[0];
   return `
 You are an experienced insurance content writer specializing in educational content for the general public.
 
@@ -121,7 +116,7 @@ Structure:
 4. FAQ — include 3 short Q&As clarifying key points
 
 Topic Rotation & Freshness:
-- Use today’s date (${todayISO}) as a seed to ensure a unique topic and angle.
+- Use today’s date (${d}) as a seed to ensure a unique topic and angle.
 - Vary content daily by switching between:
   • Beginner’s guides
   • Step-by-step checklists
@@ -145,18 +140,18 @@ Tags:
 - Tags should stay related to insurance but are not restricted to a fixed list.
 
 Images:
-- Do NOT return image URLs or keywords. Images are selected downstream from a provider.
+- Do NOT return image URLs or keywords. Images are generated downstream.
 - Focus on clear title/excerpt/tags so illustrations can be aligned.
 
 Output:
-Return ONLY valid JSON (no markdown fences) with the following structure:
+Return ONLY valid JSON (no markdown fences) with:
 
 {
   "id": "kebab-case-slug-of-title",
   "title": "Title Case",
   "excerpt": "1–2 sentence summary.",
   "author": "Staff Writer",
-  "date": "${todayISO}",
+  "date": "${d}",
   "primary_tag": "(main tag)",
   "tags": ["tag1","tag2","tag3"],
   "body_html": "<p>Full HTML article…</p>"
@@ -204,171 +199,99 @@ async function generateArticleJSON() {
   return obj;
 }
 
-// -------------------- Pixabay (safe query + fallbacks) --------------------
-// API docs: https://pixabay.com/api/docs/
-// We download and self-host images to avoid 403/404 from hotlinking.
+// -------------------- DeepAI Text2Img --------------------
+// Docs: endpoint https://api.deepai.org/api/text2img ; header 'api-key'; width/height 128–1536 and multiples of 32. :contentReference[oaicite:1]{index=1}
 
-// Build a safe, ≤100-character query string (Pixabay limit)
-function buildPixabayQuery({ title, primary_tag, tags }) {
-  const baseKeywords = [
-    (primary_tag || "").toLowerCase(),
-    ...(Array.isArray(tags) ? tags : []).map(t => String(t || "").toLowerCase())
-  ]
-    .filter(Boolean)
-    .map(s => s.replace(/[^a-z0-9\s-]/g, ""))
-    .map(s => s.trim())
-    .filter(Boolean);
-
-  const suffix = " insurance illustration vector";
-  const uniq = [];
-  for (const k of baseKeywords) {
-    if (!uniq.includes(k)) uniq.push(k);
-  }
-
-  const maxQ = 100;
-  let q = "";
-  for (const k of uniq) {
-    const candidate = (q ? q + " " : "") + k;
-    if ((candidate + suffix).length <= maxQ) {
-      q = candidate;
-    } else {
-      break;
-    }
-  }
-  if (!q) q = (primary_tag || "insurance").toLowerCase();
-
-  let finalQ = (q + suffix).slice(0, maxQ).trim();
-  if (finalQ.length === maxQ) {
-    finalQ = finalQ.replace(/\s+\S*$/, "");
-  }
-  return finalQ || "insurance illustration";
+function extractH2Topics(html = "") {
+  const matches = [...html.matchAll(/<h2[^>]*>(.*?)<\/h2>/gi)].map(m => m[1]);
+  return matches.slice(0, 3).map(s => s.replace(/<[^>]+>/g, "").trim()).filter(Boolean);
 }
 
-// Build a few short fallback queries (also safe-capped)
-function buildPixabayFallbackQueries({ title, primary_tag, tags }) {
-  const tagList = (Array.isArray(tags) ? tags : []).map(t => String(t || "").toLowerCase());
-  const primary = String(primary_tag || "").toLowerCase();
-  const small = (s) => (s || "").replace(/[^a-z0-9\s-]/gi, "").trim().slice(0, 45);
-
-  const candidates = [
-    small(primary),
-    ...tagList.map(small),
-    small(String(title || "")),
-    "auto insurance",
-    "homeowners insurance",
-    "health insurance",
-    "life insurance",
-    "business insurance",
-    "cyber insurance"
-  ].filter(Boolean);
-
-  const uniq = [];
-  for (const c of candidates) if (!uniq.includes(c)) uniq.push(c);
-
-  return uniq.slice(0, 6).map(k =>
-    buildPixabayQuery({ title: "", primary_tag: k, tags: [] })
-  );
+function buildDeepAIPrompt({ title, excerpt, primaryTag, tags, body_html }) {
+  const keywords = [primaryTag, ...(tags || [])].filter(Boolean).slice(0, 6).join(", ");
+  const ideas = extractH2Topics(body_html).join(", ");
+  return [
+    `Flat vector / infographic-style illustration about: ${keywords || "insurance coverage"}.`,
+    `Title cue: ${title}.`,
+    excerpt ? `Summary: ${excerpt}` : "",
+    ideas ? `Key ideas: ${ideas}` : "",
+    "Requirements: minimal, professional, neutral; no text, no brand logos, no real people or buildings; clean shapes; high contrast; educational tone."
+  ].filter(Boolean).join(" ");
 }
 
-async function pixabaySearch({ query, perPage = 20 }) {
-  if (!PIXABAY_API_KEY) return [];
-  const url = new URL("https://pixabay.com/api/");
-  console.log  ("Query ", query)
-  url.searchParams.set("key", PIXABAY_API_KEY);
-  url.searchParams.set("q", query);
-  url.searchParams.set("image_type", "illustration");
-  url.searchParams.set("safesearch", "true");
-  url.searchParams.set("per_page", String(perPage));
+// DeepAI requires width/height multiples of 32 (recommend staying <= 1024). :contentReference[oaicite:2]{index=2}
+const DAI_W = 1024; // 32 * 32
+const DAI_H = 640;  // 32 * 20
 
-  const res = await fetch(url.toString());
-  if (!res.ok) {
-    const t = await res.text().catch(() => "");
-    console.warn(`Pixabay API ${res.status} for q="${query}": ${t.slice(0, 120)}...`);
-    return [];
+async function deepaiGenerateOneImage({ prompt, filenameBase }) {
+  // Returns {filename, url} (self-hosted) or throws
+  const form = new URLSearchParams();
+  form.set("text", prompt);
+  form.set("width", String(DAI_W));
+  form.set("height", String(DAI_H));
+
+  const resp = await fetch("https://api.deepai.org/api/text2img", {
+    method: "POST",
+    headers: { "api-key": DEEPAI_API_KEY },
+    body: form
+  });
+
+  if (!resp.ok) {
+    const t = await resp.text().catch(() => "");
+    throw new Error(`DeepAI ${resp.status}: ${t.slice(0, 160)}`);
   }
-  const data = await res.json();
-  return data.hits || [];
+
+  const data = await resp.json();
+  // DeepAI typically returns `output_url` (single) or `output` (array of URLs)
+  const url = data.output_url || (Array.isArray(data.output) ? data.output[0] : null);
+  if (!url) throw new Error("DeepAI: no output_url in response");
+
+  const filename = `${filenameBase}.png`;
+  const filepath = path.join(IMG_DIR, filename);
+  await downloadToFile(url, filepath); // self-host to avoid future 403/404
+
+  return { filename, url: `${IMG_BASE_URL}/${filename}` };
 }
 
-function rankPixabayHits(hits) {
-  const kw = ["insurance", "policy", "coverage", "security", "risk", "claim", "car", "home", "health", "life", "business", "cyber"];
-  const score = (t = "") => kw.reduce((acc, k) => acc + (t.toLowerCase().includes(k) ? 1 : 0), 0);
-  return hits
-    .map(h => ({ h, s: score(h.tags || "") }))
-    .sort((a, b) => b.s - a.s)
-    .map(x => x.h);
-}
-
-async function fetchPixabayIllustrations({ title, primaryTag, tags, dateISO, count = 1 }) {
-  if (!PIXABAY_API_KEY) {
-    const slug = slugify(title || primaryTag || (tags && tags[0]) || "insurance");
-    return Array.from({ length: count }, (_, i) => ({
-      url: `https://picsum.photos/seed/${slug}-${dateISO}-${i + 1}/1200/800`,
-      alt: `abstract insurance concept (${i + 1})`,
-      source: "picsum.photos",
-      license: "Placeholder",
-    }));
-  }
-
-  // 1) main safe query
-  const mainQ = buildPixabayQuery({ title, primary_tag: primaryTag, tags });
-  let hits = await pixabaySearch({ query: mainQ, perPage: Math.max(30, count) });
-
-
-  // 2) fallback queries if empty
-  if (!hits.length) {
-    const fallbacks = buildPixabayFallbackQueries({ title, primary_tag: primaryTag, tags });
-    for (const q of fallbacks) {
-      hits = await pixabaySearch({ query: q, perPage: Math.max(30, count) });
-      if (hits.length) break;
-    }
-  }
-
-  if (!hits.length) {
-    // last-resort: picsum placeholders so the run never fails
-    const slug = slugify(title || primaryTag || (tags && tags[0]) || "insurance");
-    return Array.from({ length: count }, (_, i) => ({
-      url: `https://picsum.photos/seed/${slug}-${dateISO}-${i + 1}/1200/800`,
-      alt: `abstract insurance concept (${i + 1})`,
-      source: "picsum.photos",
-      license: "Placeholder",
-    }));
-  }
-
-  const ranked = rankPixabayHits(hits).slice(0, count);
-  const out = [];
-
-  for (let i = 0; i < count; i++) {
-    const r = ranked[i];
-    const idx = i + 1;
+async function generateDeepAIIllustrations({ title, excerpt, primaryTag, tags, body_html, dateISO, count = 3 }) {
+  if (!DEEPAI_API_KEY) {
+    // Hard fallback if no key: Picsum
     const topic = slugify(primaryTag || title || "insurance").split("-").slice(0, 3).join("-");
-    const baseSlug = `${topic}-${dateISO.replace(/-/g, "")}-${idx}`;
+    return Array.from({ length: count }, (_, i) => ({
+      url: `https://picsum.photos/seed/${topic}-${dateISO}-${i + 1}/1200/800`,
+      alt: `abstract insurance concept (${i + 1})`,
+      source: "picsum.photos",
+      license: "Placeholder"
+    }));
+  }
+
+  await ensureDir(IMG_DIR);
+  const baseTopic = slugify(primaryTag || title || "insurance").split("-").slice(0, 3).join("-");
+  const promptBase = buildDeepAIPrompt({ title, excerpt, primaryTag, tags, body_html });
+
+  const out = [];
+  for (let i = 0; i < count; i++) {
+    const idx = i + 1;
+    const filenameBase = `${baseTopic}-${dateISO.replace(/-/g, "")}-${idx}`;
+    // slight per-image focus shift using tags
+    const focus = (tags && tags[i]) ? ` Focus on: ${tags[i]}.` : "";
+    const prompt = `${promptBase}${focus}`;
 
     try {
-      const src = r?.largeImageURL || r?.webformatURL || r?.previewURL;
-      if (!src) throw new Error("No usable image url in hit");
-
-      const ext = (src.split(".").pop() || "jpg").split("?")[0].toLowerCase();
-      const filename = `${baseSlug}.${["jpg","jpeg","png","webp"].includes(ext) ? ext : "jpg"}`;
-      const filepath = path.join(IMG_DIR, filename);
-
-      await downloadToFile(src, filepath);
-
+      const { url } = await deepaiGenerateOneImage({ prompt, filenameBase });
       out.push({
-        url: `${IMG_BASE_URL}/${filename}`,
-        alt: (r?.tags || "insurance illustration").slice(0, 140),
-        source: "Pixabay",
-        license: "Pixabay Content License",
-        photographer: r?.user || "",
-        photographer_url: r?.pageURL || "",
+        url,
+        alt: `illustration of ${(primaryTag || "insurance").toLowerCase()} concept (${idx})`,
+        source: "DeepAI Text2Img",
+        license: "DeepAI Terms"
       });
-    } catch (err) {
-      console.log  ("fetchPixabayIllustrations  error", err)
+    } catch {
+      // slot fallback
       out.push({
-        url: `https://picsum.photos/seed/${baseSlug}/1200/800`,
+        url: `https://picsum.photos/seed/${filenameBase}/1200/800`,
         alt: `abstract insurance concept (${idx})`,
         source: "picsum.photos",
-        license: "Placeholder",
+        license: "Placeholder"
       });
     }
   }
@@ -378,26 +301,26 @@ async function fetchPixabayIllustrations({ title, primaryTag, tags, dateISO, cou
 // -------------------- main --------------------
 
 (async function main() {
-  // 0) ensure dirs
   await ensureDir(DATA_DIR);
   await ensureDir(IMG_DIR);
 
-  // 1) load existing
   const articles = readArticles();
 
-  // 2) text: generate article JSON via LLM
+  // 1) Generate article JSON via LLM
   const draft = await generateArticleJSON();
 
-  // 3) images: fetch 3 Pixabay illustrations aligned to topic/tags; self-host
-  const images = await fetchPixabayIllustrations({
+  // 2) Generate 3 DeepAI illustrations (self-hosted)
+  const images = await generateDeepAIIllustrations({
     title: draft.title,
+    excerpt: draft.excerpt,
     primaryTag: draft.primary_tag,
     tags: draft.tags,
+    body_html: draft.body_html,
     dateISO: draft.date,
-    count: 3,
+    count: 3
   });
 
-  // 4) map to site schema (first image as primary)
+  // 3) Map to site schema (first image as primary)
   const record = {
     id: draft.id,
     title: draft.title,
@@ -405,25 +328,26 @@ async function fetchPixabayIllustrations({ title, primaryTag, tags, dateISO, cou
     author: draft.author,
     date: draft.date,
     image: images[0]?.url || "",
+    images,
     tag: draft.primary_tag,
     tags: draft.tags || [],
-    body: draft.body_html,
+    body: draft.body_html
   };
 
-  // 5) de-dupe id or same-title same-day
+  // 4) De-dupe id or same-title same-day
   const exists = articles.find(a => a.id === record.id) ||
                  articles.find(a => a.title === record.title && a.date === record.date);
   if (exists) {
-    const suffix = crypto.randomBytes(2).toString("hex");
-    record.id = `${record.id}-${suffix}`;
+    const shortId = crypto.randomBytes(2).toString("hex");
+    record.id = `${record.id}-${shortId}`;
   }
 
-  // 6) save newest → oldest
+  // 5) Save newest → oldest
   const next = [record, ...articles].sort((a, b) => new Date(b.date) - new Date(a.date));
   writeArticles(next);
 
   console.log("✅ Created article:", record.title, "→", record.id);
-  console.log("🖼  Images:", images[0]?.url || "");
+  console.log("🖼  Images:", record.images?.map(i => i.url).join(", "));
 })().catch(err => {
   console.error("❌ Generation failed:", err);
   process.exitCode = 1;
