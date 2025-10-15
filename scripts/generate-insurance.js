@@ -210,13 +210,15 @@ function extractH2Topics(html = "") {
 function buildDeepAIPrompt({ title, excerpt, primaryTag, tags, body_html }) {
   const keywords = [primaryTag, ...(tags || [])].filter(Boolean).slice(0, 6).join(", ");
   const ideas = extractH2Topics(body_html).join(", ");
-  return [
-    `Flat vector / infographic-style illustration about: ${keywords || "insurance coverage"}.`,
-    `Title cue: ${title}.`,
-    excerpt ? `Summary: ${excerpt}` : "",
-    ideas ? `Key ideas: ${ideas}` : "",
-    "Requirements: minimal, professional, neutral; no text, no brand logos, no real people or buildings; clean shapes; high contrast; educational tone."
-  ].filter(Boolean).join(" ");
+  return `A clean flat vector illustration symbolizing ${primaryTag || "insurance coverage"}, no text, no logos, no people, modern infographic style`;
+    
+  // [
+  //   `Flat vector / infographic-style illustration about: ${keywords || "insurance coverage"}.`,
+  //   `Title cue: ${title}.`,
+  //   excerpt ? `Summary: ${excerpt}` : "",
+  //   ideas ? `Key ideas: ${ideas}` : "",
+  //   "Requirements: minimal, professional, neutral; no text, no brand logos, no real people or buildings; clean shapes; high contrast; educational tone."
+  // ].filter(Boolean).join(" ");
 }
 
 // DeepAI requires width/height multiples of 32 (recommend staying <= 1024). :contentReference[oaicite:2]{index=2}
@@ -229,6 +231,9 @@ async function deepaiGenerateOneImage({ prompt, filenameBase }) {
   form.set("text", prompt);
   form.set("width", String(DAI_W));
   form.set("height", String(DAI_H));
+  form.set("model", "standard");       // model choice
+  form.set("preference", "speed");     // prioritize faster output
+  form.set("style", "classic");        // visual style
 
   const resp = await fetch("https://api.deepai.org/api/text2img", {
     method: "POST",
@@ -254,7 +259,7 @@ console.log ("  deepai call failed", `DeepAI ${resp.status}: ${t.slice(0, 160)}`
   return { filename, url: `${IMG_BASE_URL}/${filename}` };
 }
 
-async function generateDeepAIIllustrations({ title, excerpt, primaryTag, tags, body_html, dateISO, count = 3 }) {
+async function generateDeepAIIllustrations({ title, excerpt, primaryTag, tags, body_html, dateISO, count = 1 }) {
   if (!DEEPAI_API_KEY) {
     // Hard fallback if no key: Picsum
     const topic = slugify(primaryTag || title || "insurance").split("-").slice(0, 3).join("-");
@@ -311,7 +316,7 @@ async function generateDeepAIIllustrations({ title, excerpt, primaryTag, tags, b
   // 1) Generate article JSON via LLM
   const draft = await generateArticleJSON();
 
-  // 2) Generate 3 DeepAI illustrations (self-hosted)
+  // 2) Generate 1 DeepAI illustrations (self-hosted)
   const images = await generateDeepAIIllustrations({
     title: draft.title,
     excerpt: draft.excerpt,
@@ -319,7 +324,7 @@ async function generateDeepAIIllustrations({ title, excerpt, primaryTag, tags, b
     tags: draft.tags,
     body_html: draft.body_html,
     dateISO: draft.date,
-    count: 3
+    count: 1
   });
 
   // 3) Map to site schema (first image as primary)
