@@ -1,41 +1,38 @@
 /**
- * daily_insurance_article.js
- * - Calls an LLM with a strict JSON prompt to generate an insurance article
- * - Generates 3 flat vector/cartoon illustrations via OpenAI Images API
- * - Saves images under ./docs/insurance/images and appends article to ./articles.json
+ * daily_insurance_article.js  (Pixabay edition)
+ * - Calls an LLM to generate a strict-JSON insurance article
+ * - Fetches 3 illustration-style images from Pixabay
+ * - Saves images under ./docs/insurance/images and appends article to ./docs/insurance/data/articles.json
  * - Sorts newest → oldest
  *
- * Requires: Node 18+ (for global fetch)
- * Env:
- *  - OPENAI_API_KEY=...        (required)
- *  - LLM_MODEL=gpt-4o-mini     (optional override)
- *  - IMG_DIR=docs/insurance/images                 (optional override)
- *  - IMG_BASE_URL=/insurance/images                (optional override; use full CDN URL if hosting)
+ * Requires: Node 18+ (global fetch)
  *
- * Files:
- *  - ./docs/insurance/data/articles.json   (array of articles used by your site)
- *  - ./docs/insurance/images/*.png         (generated illustrations)
+ * Env:
+ *  - OPENAI_API_KEY=...                 (required for text)
+ *  - PIXABAY_API_KEY=...                (required for images)
+ *  - LLM_MODEL=gpt-4o-mini              (optional, default gpt-4o-mini)
+ *  - IMG_DIR=docs/insurance/images      (optional)
+ *  - IMG_BASE_URL=/insurance/images     (optional; or full CDN URL)
  */
 
 import fs from "fs";
 import fsp from "fs/promises";
 import path from "path";
 import crypto from "crypto";
-import { fileURLToPath } from "url";
-import OpenAI from "openai";
 
-const outDir  = path.join(process.cwd(), "docs", "insurance", "data");
-const ARTICLES_PATH = path.resolve(outDir, "articles.json");
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 const LLM_MODEL = process.env.LLM_MODEL || "gpt-4o-mini";
+const PIXABAY_API_KEY = process.env.PIXABAY_API_KEY || "";
 
-// Image output (defaults for GitHub Pages-style /docs)
+const DATA_DIR = path.join(process.cwd(), "docs", "insurance", "data");
+const ARTICLES_PATH = path.join(DATA_DIR, "articles.json");
+
 const IMG_DIR = process.env.IMG_DIR || path.join(process.cwd(), "docs", "insurance", "images");
 const IMG_BASE_URL = (process.env.IMG_BASE_URL || "/insurance/images").replace(/\/$/, "");
 
-// --- Helpers ---------------------------------------------------------------
-
 const todayISO = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+// -------------------- utils --------------------
 
 function slugify(str) {
   return String(str || "")
@@ -64,21 +61,34 @@ function writeArticles(list) {
   console.log(`Updated ${ARTICLES_PATH} (${list.length} articles)`);
 }
 
-// Remove possible code fences from LLM responses
 function stripFences(s) {
   return String(s || "").replace(/^```(?:json)?\s*|\s*```$/g, "");
 }
 
-// Ensure directory exists
 async function ensureDir(p) {
   await fsp.mkdir(p, { recursive: true });
 }
 
-// --- Build the LLM prompt (images handled in code, not by the model) ------
+async function downloadToFile(url, filepath, { retries = 2 } = {}) {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const buf = Buffer.from(await res.arrayBuffer());
+      await ensureDir(path.dirname(filepath));
+      await fsp.writeFile(filepath, buf);
+      return true;
+    } catch (err) {
+      if (attempt === retries) throw err;
+      await new Promise(r => setTimeout(r, 400 * (attempt + 1)));
+    }
+  }
+}
+
+// -------------------- prompt --------------------
 
 function buildDailyPrompt() {
   const todayISO = new Date().toISOString().split("T")[0];
-
   return `
 You are an experienced insurance content writer specializing in educational content for the general public.
 
@@ -128,14 +138,10 @@ Ensure information remains evergreen and factual.
 Tags:
 - Generate 3–6 relevant tags based on the article’s content.
 - Tags should stay related to insurance but are not restricted to a fixed list.
-- Examples:
-  "Auto Insurance", "Home Coverage", "Health Policy", "Risk Management",
-  "Claims Process", "Policy Renewal", "Small Business Coverage", "Insurance Literacy",
-  "Cyber Protection", "Travel Safety", "Pet Coverage", etc.
 
 Images:
-- Do NOT return image URLs or keywords. Images are generated downstream.
-- Focus on producing a specific, clear title, excerpt, and tags so illustrations can be thematically aligned.
+- Do NOT return image URLs or keywords. Images are selected downstream from a provider.
+- Focus on clear title/excerpt/tags so illustrations can be aligned.
 
 Output:
 Return ONLY valid JSON (no markdown fences) with the following structure:
@@ -153,40 +159,39 @@ Return ONLY valid JSON (no markdown fences) with the following structure:
 `.trim();
 }
 
-// --- Call the LLM ----------------------------------------------------------
+// -------------------- LLM call --------------------
 
 async function generateArticleJSON() {
-  if (!OPENAI_API_KEY) {
-    throw new Error("OPENAI_API_KEY missing. Set it in your environment.");
-  }
+  if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY missing.");
   const prompt = buildDailyPrompt();
+
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${OPENAI_API_KEY}`,
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       model: LLM_MODEL,
       messages: [
         { role: "system", content: "You are a careful, structured content generator that always returns strict JSON." },
-        { role: "user", content: prompt }
+        { role: "user", content: prompt },
       ],
       temperature: 0.7,
-      response_format: { type: "json_object" }
-    })
+      response_format: { type: "json_object" },
+    }),
   });
 
   if (!res.ok) {
     const errText = await res.text().catch(() => "");
     throw new Error(`LLM error ${res.status}: ${errText}`);
   }
+
   const data = await res.json();
   let content = data.choices?.[0]?.message?.content || "";
   content = stripFences(content);
   const obj = JSON.parse(content);
 
-  // Normalize/guard fields
   obj.id = slugify(obj.id || obj.title || `insurance-${todayISO}`);
   obj.date = todayISO;
   obj.author ||= "Staff Writer";
@@ -194,114 +199,155 @@ async function generateArticleJSON() {
   return obj;
 }
 
-// --- OpenAI Image Generation (illustrations only) --------------------------
+// -------------------- Pixabay integration --------------------
+// Docs: https://pixabay.com/api/docs/
+// Notes:
+// - Pixabay switched to a custom Content License; check terms.
+// - To minimize 403/404, we download and self-host images.
+// - We prefer illustration/vector style where possible.
 
-const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
-
-function buildImagePrompt({ title, primaryTag, tags }) {
-  const topic = [primaryTag, ...(tags || [])].filter(Boolean).slice(0, 6).join(", ");
-  return `
-Flat vector/cartoon illustration about: ${topic || "insurance coverage"}.
-Professional, neutral tone. Clean shapes, minimal palette, high contrast.
-No text, no brand logos, no real people, no identifiable buildings.
-Simple background, infographic-like aesthetic.
-Title cue: ${title}.
-`.trim();
+function buildPixabayQuery({ title, primary_tag, tags }) {
+  const parts = [primary_tag, ...(tags || [])]
+    .filter(Boolean)
+    .map(s => s.toLowerCase());
+  // steer toward insurance concepts + illustration
+  return `${parts.join(" ")} insurance illustration vector`;
 }
 
-async function generateIllustrations({ title, primaryTag, tags, dateISO, count = 1, width = 1024, height = 1536 }) {
-  await ensureDir(IMG_DIR);
+async function pixabaySearch({ query, perPage = 20 }) {
+  if (!PIXABAY_API_KEY) return [];
+  const url = new URL("https://pixabay.com/api/");
+  url.searchParams.set("key", PIXABAY_API_KEY);
+  url.searchParams.set("q", query);
+  url.searchParams.set("image_type", "illustration"); // prefer illustrations
+  url.searchParams.set("safesearch", "true");
+  url.searchParams.set("per_page", String(perPage));
 
-  const slug = slugify(title || primaryTag || (tags && tags[0]) || "insurance");
-  const promptBase = buildImagePrompt({ title, primaryTag, tags });
+  const res = await fetch(url.toString());
+  if (!res.ok) {
+    const t = await res.text().catch(() => "");
+    throw new Error(`Pixabay API ${res.status}: ${t}`);
+  }
+  const data = await res.json();
+  return data.hits || [];
+}
+
+function rankPixabayHits(hits) {
+  const kw = ["insurance", "policy", "coverage", "security", "risk", "claim", "car", "home", "health", "life", "business", "cyber"];
+  const score = (t = "") => kw.reduce((acc, k) => acc + (t.toLowerCase().includes(k) ? 1 : 0), 0);
+  return hits
+    .map(h => ({ h, s: score(h.tags || "") }))
+    .sort((a, b) => b.s - a.s)
+    .map(x => x.h);
+}
+
+async function fetchPixabayIllustrations({ title, primaryTag, tags, dateISO, count = 3 }) {
+  if (!PIXABAY_API_KEY) {
+    // No key → Picsum fallback
+    const slug = slugify(title || primaryTag || (tags && tags[0]) || "insurance");
+    return Array.from({ length: count }, (_, i) => ({
+      url: `https://picsum.photos/seed/${slug}-${dateISO}-${i + 1}/1200/800`,
+      alt: `abstract insurance concept (${i + 1})`,
+      source: "picsum.photos",
+      license: "Placeholder",
+    }));
+  }
+
+  const query = buildPixabayQuery({ title, primary_tag: primaryTag, tags });
+  const hits = await pixabaySearch({ query, perPage: Math.max(30, count) });
+  const ranked = rankPixabayHits(hits).slice(0, count);
 
   const out = [];
   for (let i = 0; i < count; i++) {
-    const prompt = `${promptBase}\nVariant ${i + 1}. Focus: ${(tags && tags[i]) || primaryTag || "insurance concept"}.`;
-    const filename = `${slug}-${dateISO}-${i + 1}.png`;
-    const filepath = path.join(IMG_DIR, filename);
+    const r = ranked[i];
+    const idx = i + 1;
+    const baseSlug = slugify((r?.tags || title || primaryTag || "insurance") + `-${dateISO}-${idx}`);
 
     try {
-      const resp = await openai.images.generate({
-        model: "gpt-image-1",
-        prompt,
-        size: `${width}x${height}`,
-        n: 1
-        // ❌ remove: response_format: "b64_json"
-      });
+      // Prefer large image; fall back to webformat if needed
+      const src =
+        r?.largeImageURL ||
+        r?.webformatURL ||
+        r?.previewURL;
 
-      const b64 = resp.data?.[0]?.b64_json;   // ✅ still present by default
-      if (!b64) throw new Error("No image data returned");
-      const buf = Buffer.from(b64, "base64");
-      await fsp.writeFile(filepath, buf);
+      if (!src) throw new Error("No usable image url in hit");
+
+      const ext = (src.split(".").pop() || "jpg").split("?")[0].toLowerCase();
+      const filename = `${baseSlug}.${["jpg","jpeg","png","webp"].includes(ext) ? ext : "jpg"}`;
+      const filepath = path.join(IMG_DIR, filename);
+
+      await downloadToFile(src, filepath);
 
       out.push({
         url: `${IMG_BASE_URL}/${filename}`,
-        alt: `illustration of ${(primaryTag || "insurance").toLowerCase()} concept (${i + 1})`,
-        license: "Generated (OpenAI)",
-        source: "gpt-image-1"
+        alt: (r?.tags || "insurance illustration").slice(0, 140),
+        source: "Pixabay",
+        license: "Pixabay Content License",
+        photographer: r?.user || "",
+        photographer_url: r?.pageURL || "",
       });
     } catch (err) {
-      console.log (err);
-      // Fallback: Picsum (always 200 OK)
+      // Slot fallback
       out.push({
-        url: `https://picsum.photos/seed/${slug}-${dateISO}-${i + 1}/${width}/${height}`,
-        alt: `abstract insurance concept (${i + 1})`,
-        license: "Placeholder (Picsum)",
-        source: "picsum.photos"
+        url: `https://picsum.photos/seed/${baseSlug}/1200/800`,
+        alt: `abstract insurance concept (${idx})`,
+        source: "picsum.photos",
+        license: "Placeholder",
       });
     }
   }
   return out;
 }
 
-// --- Main ------------------------------------------------------------------
+// -------------------- main --------------------
 
 (async function main() {
+  // Load existing
   const articles = readArticles();
 
   // 1) Generate article JSON via LLM
   const draft = await generateArticleJSON();
 
-  // 2) Generate 3 illustration images, inject into draft
-  const images = await generateIllustrations({
+  // 2) Fetch 3 Pixabay illustrations aligned to topic/tags; self-host
+  const images = await fetchPixabayIllustrations({
     title: draft.title,
     primaryTag: draft.primary_tag,
     tags: draft.tags,
     dateISO: draft.date,
     count: 3,
-    width: 1024,
-    height: 1024
   });
 
-  // 3) Map to your site’s schema (keep first as main image; store all in images)
+  // 3) Map to site schema (first image as primary)
   const record = {
     id: draft.id,
     title: draft.title,
     excerpt: draft.excerpt,
     author: draft.author,
     date: draft.date,
-    image: images[0]?.url,       // primary image for listing
-    tag: draft.primary_tag,      // primary tag for grid
-    tags: draft.tags || [],      // all tags
-    body: draft.body_html        // article HTML
+    image: images[0]?.url || "",
+    images,
+    tag: draft.primary_tag,
+    tags: draft.tags || [],
+    body: draft.body_html,
   };
 
-  // 4) De-dupe by id or same-title same-day
+  // 4) De-dupe id or same-title same-day
   const exists = articles.find(a => a.id === record.id) ||
                  articles.find(a => a.title === record.title && a.date === record.date);
   if (exists) {
+    // ensure unique slug suffix
     const suffix = crypto.randomBytes(2).toString("hex");
     record.id = `${record.id}-${suffix}`;
   }
 
-  // 5) Append + sort newest → oldest
+  // 5) Save list newest → oldest
   const next = [record, ...articles].sort((a, b) => new Date(b.date) - new Date(a.date));
+  await ensureDir(DATA_DIR);
   writeArticles(next);
 
-  console.log("Created article:", record.title, "→", record.id);
-  console.log("Images:", record.images?.map(i => i.url).join(", "));
+  console.log("✅ Created article:", record.title, "→", record.id);
+  console.log("🖼  Images:", record.images?.map(i => i.url).join(", "));
 })().catch(err => {
-  console.error(err);
+  console.error("❌ Generation failed:", err);
   process.exitCode = 1;
 });
