@@ -28,7 +28,7 @@ const LLM_MODEL = process.env.LLM_MODEL || "gpt-4o-mini";
 const DATA_DIR = path.join(process.cwd(), "docs", "insurance", "data");
 const ARTICLES_PATH = path.join(DATA_DIR, "articles.json");
 const IMG_DIR = process.env.IMG_DIR || path.join(process.cwd(), "docs", "insurance", "images");
-const IMG_BASE_URL = (process.env.IMG_BASE_URL || "/factsthistory/insurance/images").replace(/\/$/, "");
+const IMG_BASE_URL = (process.env.IMG_BASE_URL || "/factshistory/insurance/images").replace(/\/$/, "");
 
 const todayISO = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
