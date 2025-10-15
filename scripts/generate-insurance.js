@@ -273,6 +273,7 @@ function buildPixabayFallbackQueries({ title, primary_tag, tags }) {
 async function pixabaySearch({ query, perPage = 20 }) {
   if (!PIXABAY_API_KEY) return [];
   const url = new URL("https://pixabay.com/api/");
+  console.log  ("Query ", query)
   url.searchParams.set("key", PIXABAY_API_KEY);
   url.searchParams.set("q", query);
   url.searchParams.set("image_type", "illustration");
@@ -282,12 +283,10 @@ async function pixabaySearch({ query, perPage = 20 }) {
   const res = await fetch(url.toString());
   if (!res.ok) {
     const t = await res.text().catch(() => "");
-  console.log  (`Pixabay API ${res.status} for q="${query}": ${t.slice(0, 120)}...`);
     console.warn(`Pixabay API ${res.status} for q="${query}": ${t.slice(0, 120)}...`);
     return [];
   }
   const data = await res.json();
-  console.log  ("Success", data)
   return data.hits || [];
 }
 
@@ -316,10 +315,8 @@ async function fetchPixabayIllustrations({ title, primaryTag, tags, dateISO, cou
   let hits = await pixabaySearch({ query: mainQ, perPage: Math.max(30, count) });
 
 
-  console.log  ("Hits", hits)
   // 2) fallback queries if empty
   if (!hits.length) {
-    console.log  ("No Hits")
     const fallbacks = buildPixabayFallbackQueries({ title, primary_tag: primaryTag, tags });
     for (const q of fallbacks) {
       hits = await pixabaySearch({ query: q, perPage: Math.max(30, count) });
@@ -328,7 +325,6 @@ async function fetchPixabayIllustrations({ title, primaryTag, tags, dateISO, cou
   }
 
   if (!hits.length) {
-    console.log  ("No  Hits 2")
     // last-resort: picsum placeholders so the run never fails
     const slug = slugify(title || primaryTag || (tags && tags[0]) || "insurance");
     return Array.from({ length: count }, (_, i) => ({
@@ -345,7 +341,8 @@ async function fetchPixabayIllustrations({ title, primaryTag, tags, dateISO, cou
   for (let i = 0; i < count; i++) {
     const r = ranked[i];
     const idx = i + 1;
-    const baseSlug = slugify((r?.tags || title || primaryTag || "insurance") + `-${dateISO}-${idx}`);
+    const topic = slugify(primaryTag || title || "insurance").split("-").slice(0, 3).join("-");
+    const baseSlug = `${topic}-${dateISO.replace(/-/g, "")}-${idx}`;
 
     try {
       const src = r?.largeImageURL || r?.webformatURL || r?.previewURL;
