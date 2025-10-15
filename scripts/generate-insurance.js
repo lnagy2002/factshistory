@@ -210,17 +210,17 @@ function extractH2Topics(html = "") {
 function buildDeepAIPrompt({ title, excerpt, primaryTag, tags, body_html }) {
   const keywords = [primaryTag, ...(tags || [])].filter(Boolean).slice(0, 6).join(", ");
   const ideas = extractH2Topics(body_html).join(", ");
-  return 
-  [
-    `GENERATE REALISTIC IMAGE OR INF_GRAPHICS SYMBOLIZING ${primaryTag || "insurance coverage"}.`,
-    `Provide an image response only, without any text or description`,
-    `HIGH-RESOLUTION PHOTO`,
-    `PHOTOGRAPHIC RESPONSE ONLY`
+  return `GENERATE REALISTIC IMAGE OR illustration SYMBOLIZING ${primaryTag || "insurance coverage"}. Provide an image response only, without any text or description. HIGH-RESOLUTION PHOTO. PHOTOGRAPHIC RESPONSE ONLY`;
+    // [
+    //   `GENERATE REALISTIC IMAGE OR INF_GRAPHICS SYMBOLIZING ${primaryTag || "insurance coverage"}.`,
+    //   `Provide an image response only, without any text or description`,
+    //   `HIGH-RESOLUTION PHOTO`,
+    //   `PHOTOGRAPHIC RESPONSE ONLY`
     // `Title cue: ${title}.`,
     // excerpt ? `Summary: ${excerpt}` : "",
     // ideas ? `Key ideas: ${ideas}` : "",
     // "Requirements: minimal, professional, neutral; no text, no brand logos, no real people or buildings; clean shapes; high contrast; educational tone."
-  ].filter(Boolean).join(" ");
+    // ].filter(Boolean).join(" ");
 }
 
 // DeepAI requires width/height multiples of 32 (recommend staying <= 1024). :contentReference[oaicite:2]{index=2}
