@@ -326,6 +326,7 @@ function buildDeepAIPrompt({ title, excerpt, primaryTag, tags, body_html }) {
   return [
     `Photographic illustration (no text) symbolizing: ${primaryTag || "insurance coverage"}.`,
     ideas ? `Key notions: ${ideas}.` : "",
+    `Provide an image response only, without any text or description. HIGH-RESOLUTION PHOTO. PHOTOGRAPHIC RESPONSE ONLY`,
     `Neutral, professional, modern; no logos, no faces; depth-of-field; high detail.`
   ].filter(Boolean).join(" ");
 }
