@@ -27,7 +27,7 @@ fs.mkdirSync(OUT_DIR_POSTS, { recursive: true });
 fs.mkdirSync(path.dirname(USED_PLANTS_PATH), { recursive: true });
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
-const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-5.1-mini';
+const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-40-mini';
 // const LLM_MODEL = process.env.LLM_MODEL || "gpt-4o-mini";
 
 if (!OPENAI_API_KEY) {
@@ -80,7 +80,7 @@ async function chooseAndWriteArticle() {
   // Ask OpenAI to: 1) pick a plant not in exclusions, 2) return full article JSON
   const payload = {
     model: OPENAI_MODEL,
-    response_format: { type: "json" },
+    text: { format: { type: "json_object" } },
     input: [
       "You are a careful botanical writer.",
       "Return STRICT JSON ONLY matching the schema below. No preface, no prose, no markdown.",
