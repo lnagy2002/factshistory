@@ -1,0 +1,40 @@
+name: Daily Insurance Article
+
+on:
+  schedule:
+    - cron: "0 1 */1 * *"   # 01:00 UTC every 3 days
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pages: write         # needed for deploy
+  id-token: write      # needed for OIDC during deploy
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install deps
+        run: npm install
+      - name: Generate puzzles
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DEEPAI_API_KEY: ${{ secrets.DEEPAI_API_KEY }}
+        run: npm run plants
+      - name: Commit & push new data
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(daily): add article JSON"
+          branch: ${{ github.ref_name }}
+      - name: Upload site bundle for deploy
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./docs
