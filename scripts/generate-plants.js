@@ -13,17 +13,21 @@
  *   node generate-plant-article.js
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from "fs";
+import fsp from "fs/promises";
+import path from "path";
+import crypto from "crypto";
 
-const OUT_DIR_POSTS = path.join(process.cwd(), 'posts');
-const USED_PLANTS_PATH = path.join(process.cwd(), 'data', 'used_plants.json');
+
+const OUT_DIR_POSTS = path.join(process.cwd(), "docs", "plants", "data");
+const ARTICLES_PATH = path.join(OUT_DIR_POSTS, "articles.json");
+const USED_PLANTS_PATH = path.join(OUT_DIR_POSTS, 'used_plants.json');
 
 fs.mkdirSync(OUT_DIR_POSTS, { recursive: true });
 fs.mkdirSync(path.dirname(USED_PLANTS_PATH), { recursive: true });
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
 const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-5.1-mini';
+// const LLM_MODEL = process.env.LLM_MODEL || "gpt-4o-mini";
 
 if (!OPENAI_API_KEY) {
   console.error('Missing OPENAI_API_KEY. Please set it in your environment.');
