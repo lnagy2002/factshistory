@@ -1,249 +1,188 @@
+#!/usr/bin/env node
 /**
- * Generate a daily plant article (Markdown; no repeats) using OpenAI only.
+ * Generate a daily plant article into articles.json (no repeats).
  *
- * Outputs:
- *   - posts/YYYY-MM-DD-<plant-slug>.md
- *   - data/used_plants.json (history of used plants)
+ * Files:
+ *  - articles.json                  (array of article objects)
+ *  - data/used_plants.json          (array of plant keys used)
  *
  * Env:
- *   - OPENAI_API_KEY (required)
- *   - OPENAI_MODEL   (optional, default "gpt-5.1-mini")
+ *  - OPENAI_API_KEY (required)
+ *  - OPENAI_MODEL   (optional; default: "gpt-4o-mini")
  *
- * Run:
- *   node generate-plant-article.js
+ * Run: node generate-plant-article-json.js
  */
 
-import fs from "fs";
-import fsp from "fs/promises";
-import path from "path";
-import crypto from "crypto";
+const fs = require('fs');
+const path = require('path');
 
-
-const OUT_DIR_POSTS = path.join(process.cwd(), "docs", "plants", "data");
-const ARTICLES_PATH = path.join(OUT_DIR_POSTS, "articles.json");
-const USED_PLANTS_PATH = path.join(OUT_DIR_POSTS, 'used_plants.json');
-
-fs.mkdirSync(OUT_DIR_POSTS, { recursive: true });
-fs.mkdirSync(path.dirname(USED_PLANTS_PATH), { recursive: true });
-
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
-const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
-// const LLM_MODEL = process.env.LLM_MODEL || "gpt-4o-mini";
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
+const OPENAI_MODEL = (process.env.OPENAI_MODEL || 'gpt-4o-mini').trim();
 
 if (!OPENAI_API_KEY) {
-  console.error('Missing OPENAI_API_KEY. Please set it in your environment.');
+  console.error('Missing OPENAI_API_KEY');
   process.exit(1);
 }
 
+const ARTICLES_PATH = path.join(process.cwd(), 'articles.json');
+const USED_PLANTS_PATH = path.join(process.cwd(), 'data', 'used_plants.json');
+fs.mkdirSync(path.dirname(USED_PLANTS_PATH), { recursive: true });
 
-function todayISO() {
-  return new Date().toISOString().slice(0, 10);
-}
-function slugify(str) {
-  return String(str)
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
+function todayISO() { return new Date().toISOString().slice(0,10); }
+function slugify(s) {
+  return String(s).normalize('NFKD').replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
 }
 function readJSONSafe(file, fallback) {
-  try { return JSON.parse(fs.readFileSync(file, 'utf8')); }
-  catch { return fallback; }
+  try { return JSON.parse(fs.readFileSync(file,'utf8')); } catch { return fallback; }
 }
 function writeJSON(file, obj) {
   fs.writeFileSync(file, JSON.stringify(obj, null, 2) + '\n', 'utf8');
 }
-function escapeYAML(s) { return String(s).replace(/"/g, '\\"'); }
-function formatList(arr) {
-  if (!Array.isArray(arr) || !arr.length) return "- (none specified)\n";
-  return arr.map(x => `- ${x}`).join('\n') + '\n';
-}
-function formatSublist(obj) {
-  if (!obj) return "- (none specified)\n";
-  const lines = [];
-  if (obj.ingredients?.length) {
-    lines.push("**Ingredients:**");
-    lines.push(...obj.ingredients.map(x => `- ${x}`));
-  }
-  if (obj.steps?.length) {
-    lines.push("\n**Steps:**");
-    lines.push(...obj.steps.map((x, i) => `${i + 1}. ${x}`));
-  }
-  return lines.join('\n') + '\n';
+function clamp(s, n) { s = String(s||'').trim(); return s.length>n ? s.slice(0,n-1)+'…' : s; }
+function htmlEsc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+async function openaiJSON(promptString){
+  // Use Chat Completions with enforced JSON (most stable for now)
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method:'POST',
+    headers:{'Authorization':`Bearer ${OPENAI_API_KEY}`,'Content-Type':'application/json'},
+    body: JSON.stringify({
+      model: OPENAI_MODEL,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: "You are a careful botanical writer who produces compact, factual JSON only." },
+        { role: "user", content: promptString }
+      ],
+      temperature: 0.7
+    })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(`OpenAI error ${res.status}: ${JSON.stringify(data)}`);
+  const text = data.choices?.[0]?.message?.content || '';
+  return JSON.parse(text);
 }
 
-async function chooseAndWriteArticle() {
-  const used = readJSONSafe(USED_PLANTS_PATH, []);      // array of strings (canonical keys)
+function buildHTML(article){
+  const ben = article.benefits || {};
+  const prep = article.preparations || {};
+  const img = article.image || {};
+  const parts = [];
+
+  parts.push(`<h2>Introduction</h2>`);
+  parts.push(`<p><em>${htmlEsc(article.common_name)}</em>${article.scientific_name?` (<em>${htmlEsc(article.scientific_name)}</em>)`:''} — ${htmlEsc(article.short_history||'')}</p>`);
+
+  if (img.url) {
+    parts.push(`<p><img src="${htmlEsc(img.url)}" alt="${htmlEsc(article.common_name)}" /></p>`);
+    const credits = [img.credit, img.license, img.source].filter(Boolean).map(htmlEsc).join(' · ');
+    if (credits) parts.push(`<p><small>Image: ${credits}</small></p>`);
+  }
+
+  parts.push(`<h2>Benefits & Uses</h2>`);
+  function ul(arr){ return Array.isArray(arr)&&arr.length ? `<ul>${arr.map(x=>`<li>${htmlEsc(x)}</li>`).join('')}</ul>` : `<p><em>No items.</em></p>`; }
+  parts.push(`<h3>Tea</h3>${ul(ben.tea)}`);
+  parts.push(`<h3>Culinary</h3>${ul(ben.culinary)}`);
+  parts.push(`<h3>Salve</h3>${ul(ben.salve)}`);
+  parts.push(`<h3>Tincture</h3>${ul(ben.tincture)}`);
+  parts.push(`<h3>Other</h3>${ul(ben.other)}`);
+
+  function recipe(obj){
+    if (!obj) return `<p><em>No details.</em></p>`;
+    const ing = obj.ingredients?.length ? `<h4>Ingredients</h4><ul>${obj.ingredients.map(x=>`<li>${htmlEsc(x)}</li>`).join('')}</ul>`:'';
+    const steps = obj.steps?.length ? `<h4>Steps</h4><ol>${obj.steps.map(x=>`<li>${htmlEsc(x)}</li>`).join('')}</ol>`:'';
+    const ideas = obj.ideas?.length ? `<h4>Ideas</h4><ul>${obj.ideas.map(x=>`<li>${htmlEsc(x)}</li>`).join('')}</ul>`:'';
+    return [ing,steps,ideas].filter(Boolean).join('');
+  }
+
+  parts.push(`<h2>Ways to Prepare</h2>`);
+  parts.push(`<h3>Tea</h3>${recipe(prep.tea)}`);
+  parts.push(`<h3>Salve</h3>${recipe(prep.salve)}`);
+  parts.push(`<h3>Culinary</h3>${recipe(prep.culinary)}`);
+  parts.push(`<h3>Tincture</h3>${recipe(prep.tincture)}`);
+
+  parts.push(`<h2>Safety</h2>${ul(article.safety)}`);
+
+  if (article.sources?.length){
+    parts.push(`<h2>Sources</h2><ul>${article.sources.map(x=>`<li>${htmlEsc(x)}</li>`).join('')}</ul>`);
+  }
+
+  parts.push(`<p><small>This is educational information, not medical advice.</small></p>`);
+  return parts.join('\n');
+}
+
+(async function main(){
+  const used = readJSONSafe(USED_PLANTS_PATH, []); // array of plant_key strings
   const dateISO = todayISO();
 
-  // Ask OpenAI to: 1) pick a plant not in exclusions, 2) return full article JSON
-  const payload = {
-    model: OPENAI_MODEL,
-    text: { format: { type: "json_object" } },
-    input: [
-      "You are a careful botanical writer.",
-      "Return STRICT JSON ONLY matching the schema below. No preface, no prose, no markdown.",
-      "",
-      "Schema:",
-      "{",
-      '  "plant_key": "string",               // unique canonical key; use "<Common Name> | <Scientific Name>"',
-      '  "common_name": "string",',
-      '  "scientific_name": "string",',
-      '  "aliases": ["string"],',
-      '  "short_history": "string",',
-      '  "benefits": {',
-      '    "tea": ["string"],',
-      '    "culinary": ["string"],',
-      '    "salve": ["string"],',
-      '    "tincture": ["string"],',
-      '    "other": ["string"]',
-      '  },',
-      '  "preparations": {',
-      '    "tea": { "ingredients": ["string"], "steps": ["string"] },',
-      '    "salve": { "ingredients": ["string"], "steps": ["string"] },',
-      '    "culinary": { "ideas": ["string"] },',
-      '    "tincture": { "ingredients": ["string"], "steps": ["string"] }',
-      '  },',
-      '  "safety": ["string"],',
-      '  "image": {',
-      '    "url": "string",                  // Prefer Wikimedia Commons or other public-domain/CC images',
-      '    "license": "string",              // e.g., CC BY-SA 4.0, Public Domain',
-      '    "credit": "string",               // author/uploader credit',
-      '    "source": "string"                // page URL for attribution',
-      '  },',
-      '  "sources": ["string"]               // reputable references (peer-reviewed, NIH/NCCIH, academic press, Kew, etc.)',
-      "}",
-      "",
-      "Requirements:",
-      "- Choose a RANDOM plant commonly known to the public (culinary, medicinal, or widely recognized garden herb).",
-      "- DO NOT return any plant present in the EXCLUSIONS list.",
-      "- Tone: neutral, educational; avoid medical claims (use cautious language such as “traditionally used,” “studies suggest”).",
-      "- Benefits should map to likely uses (tea/culinary/salve/tincture/other).",
-      "- Preparations should be practical and concise.",
-      "- Safety must note allergies and medication interactions when relevant.",
-      "- Image must be public-domain or Creative Commons when possible; provide license and credit.",
-      "",
-      `EXCLUSIONS: ${JSON.stringify(used)}`,
-    ].join('\n')
+  const prompt = [
+    "Return STRICT JSON only with the schema below. Choose a RANDOM commonly known plant NOT in EXCLUSIONS.",
+    "Tone: neutral, educational; avoid medical claims (“traditionally used”, “studies suggest”).",
+    "",
+    "Schema:",
+    "{",
+    '  "plant_key": "string",',
+    '  "common_name": "string",',
+    '  "scientific_name": "string",',
+    '  "aliases": ["string"],',
+    '  "short_history": "string",',
+    '  "benefits": { "tea":["string"], "culinary":["string"], "salve":["string"], "tincture":["string"], "other":["string"] },',
+    '  "preparations": {',
+    '    "tea": { "ingredients":["string"], "steps":["string"] },',
+    '    "salve": { "ingredients":["string"], "steps":["string"] },',
+    '    "culinary": { "ideas":["string"] },',
+    '    "tincture": { "ingredients":["string"], "steps":["string"] }',
+    '  },',
+    '  "safety": ["string"],',
+    '  "image": { "url":"string", "license":"string", "credit":"string", "source":"string" },',
+    '  "sources": ["string"]',
+    "}",
+    "",
+    `EXCLUSIONS: ${JSON.stringify(used)}`
+  ].join('\n');
+
+  const article = await openaiJSON(prompt);
+
+  const plantKey = article.plant_key || `${article.common_name} | ${article.scientific_name||''}`.trim();
+  if (used.includes(plantKey)) throw new Error('Model returned excluded plant; rerun to try again.');
+
+  // Build target schema for articles.json
+  const title = `${article.common_name}: Uses, History, and Preparations`;
+  const idBase = slugify(title);
+  let id = idBase;
+
+  // Ensure unique id in articles.json
+  const articles = readJSONSafe(ARTICLES_PATH, []);
+  if (!Array.isArray(articles)) throw new Error('articles.json is not an array.');
+  const existingIds = new Set(articles.map(a => a.id));
+  let suffix = 1;
+  while (existingIds.has(id)) { id = `${idBase}-${++suffix}`; }
+
+  const imageUrl = (article.image && article.image.url) ? String(article.image.url) : "";
+
+  const bodyHTML = buildHTML(article);
+
+  const record = {
+    id,
+    title,
+    excerpt: clamp(article.short_history || `Daily insight on ${article.common_name}.`, 300),
+    author: "Staff Writer",
+    date: dateISO,
+    image: imageUrl,                      // keep empty string if you prefer to add later
+    tag: "plant",
+    tags: ["plants","herbal","daily insight", slugify(article.common_name)],
+    body: bodyHTML
   };
 
-  const res = await fetch('https://api.openai.com/v1/responses', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${OPENAI_API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
-  });
+  // Append newest first
+  articles.unshift(record);
+  writeJSON(ARTICLES_PATH, articles);
 
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(`OpenAI error: ${res.status} ${JSON.stringify(data)}`);
-  }
+  // Update used history
+  used.push(plantKey);
+  writeJSON(USED_PLANTS_PATH, used);
 
-  // Extract text JSON depending on model
-  const text =
-    data.output_text ||
-    data.output?.[0]?.content?.[0]?.text ||
-    data.choices?.[0]?.message?.content ||
-    '';
-
-  let article;
-  try {
-    article = JSON.parse(text);
-  } catch (e) {
-    throw new Error('Failed to parse model JSON. Raw: ' + text?.slice(0, 300));
-  }
-
-  // Validate not in exclusions; if violated, try again (up to 3 attempts)
-  let attempts = 1;
-  while (article?.plant_key && used.includes(article.plant_key) && attempts < 3) {
-    attempts++;
-    console.warn(`Model returned excluded plant (${article.plant_key}); retrying (${attempts})...`);
-    return await chooseAndWriteArticle();
-  }
-
-  if (!article.common_name) throw new Error('Missing common_name from model response.');
-  const title = `${article.common_name}: Uses, History, and Preparations`;
-  const slug = slugify(`${dateISO}-${article.common_name}`);
-  const postPath = path.join(OUT_DIR_POSTS, `${slug}.md`);
-
-  const md = renderMarkdown({
-    dateISO,
-    title,
-    article
-  });
-
-  fs.writeFileSync(postPath, md, 'utf8');
-  console.log(`Wrote: ${postPath}`);
-
-  // Update history
-  const key = article.plant_key || `${article.common_name} | ${article.scientific_name || ''}`.trim();
-  if (key && !used.includes(key)) {
-    used.push(key);
-    writeJSON(USED_PLANTS_PATH, used);
-  }
-
-  console.log('Done.');
-}
-
-function renderMarkdown({ dateISO, title, article }) {
-  const img = article.image || {};
-  return [
-`---`,
-`title: "${escapeYAML(title)}"`,
-`date: "${dateISO}"`,
-`slug: "${slugify(title)}"`,
-`image_url: "${img.url || ""}"`,
-`image_license: "${img.license || ""}"`,
-`image_credit: "${img.credit || ""}"`,
-`image_source: "${img.source || ""}"`,
-`---`,
-``,
-`# ${title}`,
-article.scientific_name ? `*Scientific name:* ${article.scientific_name}` : ``,
-article.aliases?.length ? `\n*Also called:* ${article.aliases.join(', ')}` : ``,
-``,
-img.url ? `![${article.common_name}](${img.url})` : `> (Add an image: consider Wikimedia Commons for CC/PD images)`,
-img.credit || img.license || img.source
-  ? `\n*Image credit:* ${[img.credit, img.license, img.source].filter(Boolean).join(' · ')}` : ``,
-``,
-`## Short history`,
-`${article.short_history || ""}`,
-``,
-`## Benefits & uses`,
-`**Tea:**`,
-formatList(article.benefits?.tea),
-`**Culinary:**`,
-formatList(article.benefits?.culinary),
-`**Salve:**`,
-formatList(article.benefits?.salve),
-`**Tincture:**`,
-formatList(article.benefits?.tincture),
-`**Other:**`,
-formatList(article.benefits?.other),
-``,
-`## Preparations`,
-`### Tea`,
-formatSublist(article.preparations?.tea),
-`### Salve`,
-formatSublist(article.preparations?.salve),
-`### Culinary ideas`,
-formatList(article.preparations?.culinary?.ideas),
-`### Tincture`,
-formatSublist(article.preparations?.tincture),
-``,
-`## Safety`,
-formatList(article.safety),
-``,
-`## Sources`,
-formatList(article.sources)
-  ].filter(Boolean).join('\n');
-}
-
-// Run
-chooseAndWriteArticle().catch(err => {
+  console.log(`Added ${article.common_name} -> articles.json (id: ${id})`);
+})().catch(err => {
   console.error(err);
   process.exit(1);
 });
