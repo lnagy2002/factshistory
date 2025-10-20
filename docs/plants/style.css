@@ -12,7 +12,7 @@ body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-
 .brand-mark{width:42px; aspect-ratio:1; border:2px solid #fff; border-radius:999px; display:grid; place-items:center; font-family:"Playfair Display",serif; font-weight:700}
 .brand-title{font-family:"Playfair Display",serif; font-weight:700; letter-spacing:.4px; font-size:1.25rem}
 nav.primary{display:flex; gap:1.25rem}
-nav.primary a{text-decoration:none; font-weight:500}
+nav.primary a{color:var(--ink);text-decoration:none; font-weight:500}
 nav.primary a:hover{color:var(--ink)}
 
 /* Hero */
@@ -51,8 +51,9 @@ nav.primary a:hover{color:var(--ink)}
 .prevnext a{flex:1; text-decoration:none; border:1px solid var(--line); border-radius:12px; padding:1rem; display:block}
 
 /* Footer */
-footer{background:var(--bg); color:var(--ink) !important}
+footer{background:var(--bg); color:var(--ink)}
 footer .container{display:grid; grid-template-columns:1fr 1fr; gap:2rem; padding:2rem 0}
+footer a  {color:var(--ink)}
 .legal{border-top:1px solid #ffffff1a; padding:1rem 0}
 .legal-inner{display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap}
 ```
