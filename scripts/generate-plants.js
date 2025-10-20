@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * Generate a daily plant article into articles.json (no repeats).
  *
@@ -13,8 +12,10 @@
  * Run: node generate-plant-article-json.js
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from "fs";
+import fsp from "fs/promises";
+import path from "path";
+import crypto from "crypto";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
 const OPENAI_MODEL = (process.env.OPENAI_MODEL || 'gpt-4o-mini').trim();
