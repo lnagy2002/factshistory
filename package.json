@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "insurance": "node scripts/generate-insurance.js"
+    "insurance": "node scripts/generate-insurance.js",
+    "plants": "node scripts/generate-plants.js"
   },
   "dependencies": {
     "openai": "^4.0.0"
