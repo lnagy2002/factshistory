@@ -80,8 +80,7 @@ async function chooseAndWriteArticle() {
   // Ask OpenAI to: 1) pick a plant not in exclusions, 2) return full article JSON
   const payload = {
     model: OPENAI_MODEL,
-    // Important: ask for strict JSON output using new field
-    text: { format: "json" },
+    response_format: { type: "json" },
     input: [
       "You are a careful botanical writer.",
       "Return STRICT JSON ONLY matching the schema below. No preface, no prose, no markdown.",
