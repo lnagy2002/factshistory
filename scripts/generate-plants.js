@@ -22,6 +22,7 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 const OPENAI_MODEL = (process.env.OPENAI_MODEL || "gpt-4o-mini").trim();
 const DEEPAI_API_KEY = process.env.DEEPAI_API_KEY || "";
 
+
 if (!OPENAI_API_KEY) {
   console.error("Missing OPENAI_API_KEY");
   process.exit(1);
@@ -35,6 +36,7 @@ const DATA_DIR = path.join(process.cwd(), "docs", "plants", "data");
 const IMAGES_DIR = path.join(process.cwd(), "docs", "plants", "images");
 const ARTICLES_PATH = path.join(DATA_DIR, "articles.json");
 const USED_PLANTS_PATH = path.join(DATA_DIR, "used_plants.json");
+const IMAGE_URL='https://lnagy2002.github.io/factshistory';
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
 fs.mkdirSync(IMAGES_DIR, { recursive: true });
@@ -152,7 +154,7 @@ async function deepAIImageForPlant(plantName, scientificName) {
   fs.writeFileSync(outPath, buf);
 
   // Return site-relative path (adjust if your site expects a different prefix)
-  const sitePath = `plants/images/${filename}`;
+  const sitePath = `${IMAGE_URL}/plants/images/${filename}`;
   return { sitePath, remoteUrl: url };
 }
 
