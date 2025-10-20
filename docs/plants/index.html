@@ -1,1 +1,74 @@
+<!-- =========================================
+index.html — Home with hero + sorted grid
+Copy this section into index.html
+========================================= -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Insurance Inspired — Home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="header"></div>
 
+  <!-- Hero: latest article auto-selected by date -->
+  <section class="hero container">
+    <article id="hero" class="feature" aria-live="polite"></article>
+  </section>
+
+  <!-- Grid of articles sorted by date (newest → oldest) -->
+  <section class="section container">
+    <h2>Latest Articles</h2>
+    <div id="grid" class="cards" aria-live="polite"></div>
+  </section>
+
+  <div id="footer"></div>
+  
+  <script>
+    // Sample content source (replace with your CMS/JSON feed)
+    let articles = [];
+
+    function render () {
+    // Sort newest → oldest by date
+    const byDateDesc = [...articles].sort((a,b)=> new Date(b.date) - new Date(a.date));
+
+    // Render hero with the latest article
+    const latest = byDateDesc[0];
+    const hero = document.getElementById('hero');
+    hero.innerHTML = `
+      <img src="${latest.image}" alt="Hero image for ${latest.title}">
+      <div class="content">
+        <div class="kicker">Latest • ${latest.tag}</div>
+        <h1>${latest.title}</h1>
+        <div class="meta"><time datetime="${latest.date}">${new Date(latest.date).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})}</time> • By ${latest.author}</div>
+        <p style="margin:.6rem 0 0">${latest.excerpt}</p>
+        <a class="btn" href="article.html?id=${latest.id}">Read Article</a>
+      </div>`;
+
+    // Render grid (skip the latest if you don't want duplication)
+    const grid = document.getElementById('grid');
+    byDateDesc.forEach((a, idx) => {
+      const card = document.createElement('article');
+      card.className = 'card';
+      card.innerHTML = `
+        <img src="${a.image}" alt="${a.title}">
+        <div class="pad">
+          <div class="row"><span class="pill">${a.tag}</span><span class="pill">${new Date(a.date).getFullYear()}</span></div>
+          <h3>${a.title}</h3>
+          <p class="muted">${a.excerpt}</p>
+          <div class="muted">${new Date(a.date).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})} • By ${a.author}</div>
+          <div style="margin-top:.6rem"><a href="article.html?id=${a.id}" style="text-decoration:none; font-weight:700">Read →</a></div>
+        </div>`;
+      grid.appendChild(card);
+    });
+    }
+  </script>
+  <script src="shared.js"></script>
+  
+</body>
+</html>
