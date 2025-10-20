@@ -27,7 +27,7 @@ fs.mkdirSync(OUT_DIR_POSTS, { recursive: true });
 fs.mkdirSync(path.dirname(USED_PLANTS_PATH), { recursive: true });
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
-const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-40-mini';
+const OPENAI_MODEL = process.env.OPENAI_MODEL || '"gpt-4o-min';
 // const LLM_MODEL = process.env.LLM_MODEL || "gpt-4o-mini";
 
 if (!OPENAI_API_KEY) {
