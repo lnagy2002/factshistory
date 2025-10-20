@@ -24,8 +24,9 @@ if (!OPENAI_API_KEY) {
   process.exit(1);
 }
 
-const ARTICLES_PATH = path.join(process.cwd(), 'articles.json');
-const USED_PLANTS_PATH = path.join(process.cwd(), 'data', 'used_plants.json');
+const DATA_DIR = path.join(process.cwd(), "docs", "plants", "data");
+const ARTICLES_PATH = path.join(DATA_DIR, 'articles.json');
+const USED_PLANTS_PATH = path.join(DATA_DIR, 'used_plants.json');
 fs.mkdirSync(path.dirname(USED_PLANTS_PATH), { recursive: true });
 
 function todayISO() { return new Date().toISOString().slice(0,10); }
