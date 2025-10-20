@@ -1,5 +1,5 @@
 :root{
-  --bg:#E8EFE7; --paper:#f7f5ef; --ink:#1c1c1c; --line:#e7e2d6; --brand:#c29a5b; --muted:#6b7280;
+  --bg:#170b03; --paper:#807e5c; --ink:#fbf7ba; --line:#e7e2d6; --brand:#1b0a02; --muted:#6b7280;
 }
 html,body{height:100%}
 body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif; background:var(--paper); color:var(--ink); line-height:1.6}
