@@ -26,6 +26,7 @@ const USED_PLANTS_PATH = path.join(OUT_DIR_POSTS, 'used_plants.json');
 fs.mkdirSync(OUT_DIR_POSTS, { recursive: true });
 fs.mkdirSync(path.dirname(USED_PLANTS_PATH), { recursive: true });
 
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-5.1-mini';
 // const LLM_MODEL = process.env.LLM_MODEL || "gpt-4o-mini";
 
