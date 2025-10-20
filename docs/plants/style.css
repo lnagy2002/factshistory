@@ -51,7 +51,7 @@ nav.primary a:hover{color:var(--ink)}
 .prevnext a{flex:1; text-decoration:none; border:1px solid var(--line); border-radius:12px; padding:1rem; display:block}
 
 /* Footer */
-footer{background:var(--bg); color:var(--ink)}
+footer{background:var(--bg); color:var(--ink) !important}
 footer .container{display:grid; grid-template-columns:1fr 1fr; gap:2rem; padding:2rem 0}
 .legal{border-top:1px solid #ffffff1a; padding:1rem 0}
 .legal-inner{display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap}
