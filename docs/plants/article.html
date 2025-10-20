@@ -1,0 +1,60 @@
+<!-- =========================================
+article.html — Article template
+Copy this section into article.html
+========================================= -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Article — Plant Wisdom Daily</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+  
+</head>
+<body>
+  <div id="header"></div>
+
+  <main id="post" class="container article" aria-live="polite"></main>
+
+  <div id="footer"></div>
+
+  <script>
+    // Reuse the same data schema as index.html. In production, fetch from your CMS.
+    let articles = [];
+    function  render  () {
+    // Parse id from URL
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+    const post = articles.find(a => a.id === id) || articles.sort((a,b)=> new Date(b.date)-new Date(a.date))[0];
+
+    // Render article
+    const root = document.getElementById('post');
+    root.innerHTML = `
+      <img class="hero-img" src="${post.image}" alt="${post.title}">
+      <article>
+        <div class="meta"><span>${post.tag}</span> • <time datetime="${post.date}">${new Date(post.date).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})}</time></div>
+        <h1>${post.title}</h1>
+        <div class="byline"><div>By <strong>${post.author}</strong></div><div class="tags"><span class="tag">${post.tag}</span></div></div>
+        ${post.body}
+        <div class="prevnext" id="pn"></div>
+      </article>`;
+
+    // Prev/Next links by date
+    const ordered = [...articles].sort((a,b)=> new Date(a.date)-new Date(b.date));
+    const idx = ordered.findIndex(a=>a.id===post.id);
+    const prev = ordered[idx-1];
+    const next = ordered[idx+1];
+    const pn = document.getElementById('pn');
+    pn.innerHTML = `
+      ${prev?`<a href="article.html?id=${prev.id}"><div class="muted">← Previous</div><div>${prev.title}</div></a>`:''}
+      ${next?`<a href="article.html?id=${next.id}"><div class="muted">Next →</div><div>${next.title}</div></a>`:''}
+    `;
+    }
+  </script>
+  <script src="shared.js"></script>
+</body>
+</html>
