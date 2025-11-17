@@ -326,8 +326,12 @@ function buildDeepAIPrompt({ title, excerpt, primaryTag, tags, body_html }) {
   return [
     `Photographic illustration (no text) symbolizing: ${primaryTag || "insurance coverage"}.`,
     ideas ? `Key notions: ${ideas}.` : "",
-    `Provide an image response only, without any text or description. HIGH-RESOLUTION PHOTO. PHOTOGRAPHIC RESPONSE ONLY`,
-    `Neutral, professional, modern; no logos, no faces; depth-of-field; high detail.`
+    `No text, no typography, no documents, no posters, no labels, no paperwork, no signage.`,
+    `No words or numbers visible anywhere.`,
+    `No faces; neutral, modern, professional corporate imagery.`,
+    `Clean background, soft depth-of-field, crisp details.`,
+    `Show purely visual symbolism — objects, environment, composition only.`,
+    `<no_text> Text Removal: enforced`
   ].filter(Boolean).join(" ");
 }
 
