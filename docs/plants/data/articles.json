@@ -1,5 +1,21 @@
 [
   {
+    "id": "prickly-pear-uses-history-and-preparations",
+    "title": "Prickly Pear: Uses, History, and Preparations",
+    "excerpt": "Prickly pear is native to the Americas and has been cultivated for food and ornamental purposes for centuries. Its pads and fruits are used in various culinary applications.",
+    "author": "Staff Writer",
+    "date": "2026-04-09",
+    "image": "https://example.com/images/prickly_pear.jpg",
+    "tag": "plant",
+    "tags": [
+      "plants",
+      "herbal",
+      "daily insight",
+      "prickly-pear"
+    ],
+    "body": "<h2>Introduction</h2>\n<p><em>Prickly Pear</em> (<em>Opuntia ficus-indica</em>) — Prickly pear is native to the Americas and has been cultivated for food and ornamental purposes for centuries. Its pads and fruits are used in various culinary applications.</p>\n<p><img src=\"https://example.com/images/prickly_pear.jpg\" alt=\"Prickly Pear\" /></p>\n<p><small>Image: Photographer Name · CC BY-SA 4.0 · Example Source</small></p>\n<h2>Benefits & Uses</h2>\n<h3>Tea</h3><ul><li>Refreshing beverage</li></ul>\n<h3>Culinary</h3><ul><li>Fruit can be used in salads, jams, and desserts</li></ul>\n<h3>Salve</h3><ul><li>Used for skin applications</li></ul>\n<h3>Tincture</h3><ul><li>Extracts for flavoring</li></ul>\n<h3>Other</h3><ul><li>Used as a natural dye</li></ul>\n<h2>Ways to Prepare</h2>\n<h3>Tea</h3><h4>Ingredients</h4><ul><li>Dried prickly pear pads</li><li>Water</li></ul><h4>Steps</h4><ol><li>Boil water</li><li>Add dried pads</li><li>Steep for 10 minutes</li></ol>\n<h3>Salve</h3><h4>Ingredients</h4><ul><li>Fresh prickly pear pads</li><li>Beeswax</li><li>Oil</li></ul><h4>Steps</h4><ol><li>Blend pads with oil</li><li>Heat and add beeswax</li><li>Cool to set</li></ol>\n<h3>Culinary</h3><h4>Ideas</h4><ul><li>Add diced prickly pear fruit to salads</li><li>Use in smoothies</li><li>Make prickly pear syrup for drinks</li></ul>\n<h3>Tincture</h3><h4>Ingredients</h4><ul><li>Fresh prickly pear fruit</li><li>Alcohol</li></ul><h4>Steps</h4><ol><li>Chop fruit</li><li>Combine with alcohol in a jar</li><li>Let steep for 2-4 weeks</li></ol>\n<h2>Safety</h2><ul><li>Handle spines carefully</li><li>Avoid consumption of unripe fruit</li></ul>\n<h2>Sources</h2><ul><li>Botanical literature</li><li>Culinary guides</li></ul>\n<p><small>This is educational information, not medical advice.</small></p>"
+  },
+  {
     "id": "fennel-uses-history-and-preparations",
     "title": "Fennel: Uses, History, and Preparations",
     "excerpt": "Fennel is a flowering plant species in the carrot family, native to the Mediterranean and widely cultivated for culinary and medicinal purposes.",
