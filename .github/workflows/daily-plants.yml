@@ -1,9 +1,9 @@
 name: Daily Plant Article
 
-on:
-  schedule:
-    - cron: "0 1 */1 * *"   # 01:00 UTC every 3 days
-  workflow_dispatch: {}
+#on:
+#  schedule:
+#    - cron: "0 1 */1 * *"   # 01:00 UTC every 3 days
+#  workflow_dispatch: {}
 
 permissions:
   contents: write
